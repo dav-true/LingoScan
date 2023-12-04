@@ -5,7 +5,6 @@ package com.lingoscan.compose.scan
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import android.view.Surface.ROTATION_0
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -34,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
@@ -64,11 +62,6 @@ fun ScanScreen(
     val showCameraView = remember { mutableStateOf(false)}
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
-    LaunchedEffect(key1 = Unit) {
-        if (!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
-            cameraPermissionState.launchPermissionRequest()
-        }
-    }
 
     Column {
         Button(
@@ -76,7 +69,14 @@ fun ScanScreen(
                 .height(50.dp)
                 .fillMaxWidth()
                 .padding(10.dp),
-            onClick = { showCameraView.value = true }) {
+            onClick = {
+                if(!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
+                    cameraPermissionState.launchPermissionRequest()
+                } else {
+                    showCameraView.value = true
+                }
+
+            }) {
             Text(text = "Scan Image")
         }
     }
@@ -93,7 +93,6 @@ fun ScanScreen(
 
 @Composable
 fun ScanCameraView(imageClassifierHelper: ImageClassifierHelper) {
-
     val context = LocalContext.current
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
     val executor = remember { Executors.newSingleThreadExecutor() }
@@ -103,7 +102,6 @@ fun ScanCameraView(imageClassifierHelper: ImageClassifierHelper) {
 
     val lensFacing = CameraSelector.LENS_FACING_BACK
 
-
     val preview = Preview.Builder().build()
     val previewView = remember { PreviewView(context) }
     val imageCapture: ImageCapture = remember { ImageCapture.Builder().build() }
@@ -111,37 +109,23 @@ fun ScanCameraView(imageClassifierHelper: ImageClassifierHelper) {
         .requireLensFacing(lensFacing)
         .build()
 
-    var lastResultTime by remember {
-        mutableLongStateOf(0L)
-    }
-
-    var resultText by remember() {
+    var detectedResult by remember() {
         mutableStateOf("")
     }
-
-    var previousResultText by remember {
-        mutableStateOf("")
-    }
-
 
     val resultTextDerivedState = remember {
         derivedStateOf {
-            resultText
-//            if(resultText.isNotEmpty()) {
-//                previousResultText = resultText
-//                lastResultTime = System.currentTimeMillis()
-//                resultText
-//            } else {
-//                if(lastResultTime > 0L && System.currentTimeMillis() - lastResultTime < 3000L) {
-//                    previousResultText
-//                } else {
-//                    lastResultTime = 0L
-//                    previousResultText = resultText
-//                    resultText
-//                }
-//            }
+            detectedResult
         }
     }
+
+    var resultText by remember {
+        mutableStateOf("")
+    }
+
+    resultTextDerivedState.value.useDebounce(delayMillis = 1200, delayCondition = resultTextDerivedState.value.isBlank(), onChange = {
+        resultText = it
+    })
 
 
     LaunchedEffect(lensFacing) {
@@ -155,14 +139,14 @@ fun ScanCameraView(imageClassifierHelper: ImageClassifierHelper) {
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
                 .also {
-                    it.setAnalyzer(executor) { image ->
+                    it.setAnalyzer(executor) { imageProxy ->
                         if (!initializeBitmapBuffer.value) {
                             bitmapBuffer =
-                                Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888)
+                                Bitmap.createBitmap(imageProxy.width, imageProxy.height, Bitmap.Config.ARGB_8888)
                             initializeBitmapBuffer.value = true
                         }
 
-                        classifyImage(imageClassifierHelper, bitmapBuffer, image, previewView.display.rotation)
+                        imageClassifierHelper.classify(imageProxy, bitmapBuffer, previewView.display.rotation)
                     }
                 }
 
@@ -186,7 +170,7 @@ fun ScanCameraView(imageClassifierHelper: ImageClassifierHelper) {
         override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
             Log.w("mytag", "onResults: $results")
             results?.get(0)?.categories?.sortedBy { it?.index }?.filter { it.label.isNotEmpty() }?.let { results ->
-                resultText = if (results.isNotEmpty()) {
+                detectedResult = if (results.isNotEmpty()) {
                     results.joinToString { it?.label.toString() }
                 } else {
                     ""
@@ -223,7 +207,7 @@ fun ScanCameraView(imageClassifierHelper: ImageClassifierHelper) {
                             .wrapContentSize()
                             .background(Color.Black)
                             .padding(8.dp),
-                        text = resultTextDerivedState.value,
+                        text = resultText,
                         color = Color.White,
                         fontSize = 22.sp
                     )
@@ -235,13 +219,13 @@ fun ScanCameraView(imageClassifierHelper: ImageClassifierHelper) {
 }
 
 
-private fun classifyImage(imageClassifierHelper: ImageClassifierHelper, bitmapBuffer: Bitmap, image: ImageProxy, rotation: Int) {
-    // Copy out RGB bits to the shared bitmap buffer
-    image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
-
-    // Pass Bitmap and rotation to the image classifier helper for processing and classification
-    imageClassifierHelper.classify(bitmapBuffer, rotation)
-}
+//private fun classifyImage(imageClassifierHelper: ImageClassifierHelper, bitmapBuffer: Bitmap, image: ImageProxy, rotation: Int) {
+//    // Copy out RGB bits to the shared bitmap buffer
+//    image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
+//
+//    // Pass Bitmap and rotation to the image classifier helper for processing and classification
+//    imageClassifierHelper.classify(bitmapBuffer, rotation)
+//}
 
 @Composable
 fun NoPermissionView(

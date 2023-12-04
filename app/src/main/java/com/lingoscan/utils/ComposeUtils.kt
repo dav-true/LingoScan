@@ -15,6 +15,7 @@ fun <T> T.useDebounce(
     delayMillis: Long = 300L,
     // 1. couroutine scope
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
+    delayCondition: Boolean,
     onChange: (T) -> Unit
 ): T{
     // 2. updating state
@@ -23,7 +24,9 @@ fun <T> T.useDebounce(
     // 3. launching the side-effect handler
     DisposableEffect(state){
         val job = coroutineScope.launch {
-            delay(delayMillis)
+            if(delayCondition) {
+                delay(delayMillis)
+            }
             onChange(state)
         }
         onDispose {

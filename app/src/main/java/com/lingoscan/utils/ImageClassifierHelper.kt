@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.os.SystemClock
 import android.util.Log
 import android.view.Surface
+import androidx.camera.core.ImageProxy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.ImageProcessor
@@ -81,7 +82,9 @@ class ImageClassifierHelper @Inject constructor(
         }
     }
 
-    fun classify(image: Bitmap, rotation: Int) {
+    fun classify(imageProxy: ImageProxy, bitmapBuffer: Bitmap, rotation: Int) {
+        imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
+
         if (imageClassifier == null) {
             setupImageClassifier()
         }
@@ -98,7 +101,7 @@ class ImageClassifierHelper @Inject constructor(
                 .build()
 
         // Preprocess the image and convert it into a TensorImage for classification.
-        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))
+        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(bitmapBuffer))
 
         val imageProcessingOptions = ImageProcessingOptions.builder()
             .setOrientation(getOrientationFromRotation(rotation))
