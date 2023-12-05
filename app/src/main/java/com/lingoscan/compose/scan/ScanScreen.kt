@@ -14,15 +14,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,14 +26,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +48,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -55,22 +56,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
-import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.lingoscan.scan.utils.ImageClassifierHelper
+import com.lingoscan.scan.utils.ImageUtils
 import com.lingoscan.scan.utils.getString
 import com.lingoscan.translate.utils.TranslatorProvider
 import com.lingoscan.utils.getCameraProvider
 import com.lingoscan.utils.useDebounce
 import kotlinx.coroutines.delay
 import org.tensorflow.lite.task.vision.classifier.Classifications
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 @Composable
@@ -100,7 +97,9 @@ fun ScanScreen(
     }
 
     if (showCameraView.value) {
-        CameraView(imageClassifierHelper, translatorProvider)
+        CameraView(imageClassifierHelper, translatorProvider, onBackPress = {
+            showCameraView.value = false
+        })
     }
 }
 
@@ -108,7 +107,8 @@ fun ScanScreen(
 @Composable
 fun CameraView(
     imageClassifierHelper: ImageClassifierHelper,
-    translatorProvider: TranslatorProvider
+    translatorProvider: TranslatorProvider,
+    onBackPress: () -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
@@ -151,10 +151,10 @@ fun CameraView(
         mutableStateOf("")
     }
 
-
     var capturedImageUri by remember {
         mutableStateOf(Uri.EMPTY)
     }
+
 
     LaunchedEffect(resultText) {
         translatorProvider.translate(resultText, onSuccess = {
@@ -239,18 +239,17 @@ fun CameraView(
                 resultText = resultText,
                 translatedText = translatedText,
                 onCapture = {
-                    takePhoto(
-                        filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
+                    ImageUtils.takePhoto(
                         imageCapture = imageCapture,
                         outputDirectory = context.filesDir,
                         executor = executor,
                         onImageCaptured = { uri ->
-                            Log.w("mytag", "onImageCaptured: $uri")
                             capturedImageUri = uri
-                        },
-                        onError = {
-                            Log.w("mytag", "onError: $it")
                         })
+                },
+                onBackPress = {
+                    executor.shutdownNow()
+                    onBackPress.invoke()
                 })
 
 
@@ -291,12 +290,26 @@ fun CameraView(
 fun CameraSurface(
     resultText: String,
     translatedText: String,
-    onCapture: () -> Unit
+    onCapture: () -> Unit,
+    onBackPress: () -> Unit
 ) {
-
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
+
+        Row {
+            IconButton(onClick = onBackPress) {
+                Icon(
+                    modifier = Modifier.background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    ).padding(5.dp),
+                    painter = rememberVectorPainter(image = Icons.Default.ArrowBack),
+                    tint = Color.White,
+                    contentDescription = "BackButton"
+                )
+            }
+        }
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -358,66 +371,15 @@ fun CameraSurface(
                 Button(
                     modifier = Modifier.padding(bottom = 10.dp),
                     onClick = onCapture) {
-                    Text(text = "Capture!", fontSize = 20.sp)
+                    Text(text = "Capture!", fontSize = 22.sp)
                 }
             }
         }
     }
 }
 
-private fun takePhoto(
-    filenameFormat: String,
-    imageCapture: ImageCapture,
-    outputDirectory: File,
-    executor: Executor,
-    onImageCaptured: (Uri) -> Unit,
-    onError: (ImageCaptureException) -> Unit
-) {
-
-    val photoFile = File(
-        outputDirectory,
-        SimpleDateFormat(filenameFormat, Locale.US).format(System.currentTimeMillis()) + ".jpg"
-    )
-
-    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-    imageCapture.takePicture(outputOptions, executor, object: ImageCapture.OnImageSavedCallback {
-        override fun onError(exception: ImageCaptureException) {
-            Log.e("kilo", "Take photo error:", exception)
-            onError(exception)
-        }
-
-        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-            val savedUri = Uri.fromFile(photoFile)
-            onImageCaptured(savedUri)
-        }
-    })
-}
-
 @androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun Preview() {
-    CameraSurface(resultText = "More", translatedText = "Some", onCapture = { })
+    CameraSurface(resultText = "More", translatedText = "Some", onCapture = { }, onBackPress = { })
 }
-
-@androidx.compose.ui.tooling.preview.Preview
-@Composable
-fun PreviewImage() {
-    Image(
-        painter = rememberImagePainter(
-            data = "data"
-        ),
-        contentDescription = "Captured Image",
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(30.dp)
-            .border(
-                width = 2.dp,
-                color = Color.Black,
-                shape = RoundedCornerShape(8.dp)
-            )
-        ,
-    )
-}
-
