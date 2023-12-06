@@ -1,5 +1,9 @@
 package com.lingoscan.scan.utils
 
+import android.content.ContentResolver
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -35,5 +39,14 @@ object ImageUtils {
                 onImageCaptured(savedUri)
             }
         })
+    }
+
+    fun getBitmap(context: Context, uri: Uri):Bitmap?{
+        val resolver: ContentResolver = context.contentResolver
+        val inputStream =
+            resolver.openInputStream(uri)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
+        return bitmap
     }
 }

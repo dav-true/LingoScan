@@ -10,6 +10,7 @@ fun List<Classifications>?.getString(): String {
     return this?.get(0)?.categories?.sortedBy { it?.index }
         ?.filter { it.label.isNotEmpty() }
         ?.takeIf { it.isNotEmpty() }
+        ?.take(1)
         ?.let { results ->
             results.joinToString { it?.label.toString() }
         }.orEmpty()

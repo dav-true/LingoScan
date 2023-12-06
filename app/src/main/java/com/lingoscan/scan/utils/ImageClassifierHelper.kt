@@ -10,11 +10,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.image.ops.ResizeOp
+import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.core.vision.ImageProcessingOptions
 import org.tensorflow.lite.task.vision.classifier.Classifications
 import org.tensorflow.lite.task.vision.classifier.ImageClassifier
 import javax.inject.Inject
+
 
 class ImageClassifierHelper @Inject constructor(
     @ApplicationContext private val context: Context
@@ -23,9 +26,9 @@ class ImageClassifierHelper @Inject constructor(
 
     var imageClassifierListener: ClassifierListener? = null
 
-    var threshold: Float = 0.5f
-    var numThreads: Int = 2
-    var maxResults: Int = 3
+    var threshold: Float = 0.3f
+    var numThreads: Int = 3
+    var maxResults: Int = 1
     var currentDelegate: Int = 0
     var currentModel: Int = 0
 
@@ -82,8 +85,12 @@ class ImageClassifierHelper @Inject constructor(
         }
     }
 
-    fun classify(imageProxy: ImageProxy, bitmapBuffer: Bitmap, rotation: Int) {
-        imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
+    fun classify(bitmap: Bitmap) {
+        classify(null, bitmap, 1)
+    }
+
+    fun classify(imageProxy: ImageProxy?, bitmapBuffer: Bitmap, rotation: Int) {
+        imageProxy?.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
 
         if (imageClassifier == null) {
             setupImageClassifier()
@@ -96,8 +103,18 @@ class ImageClassifierHelper @Inject constructor(
         // Create preprocessor for the image.
         // See https://www.tensorflow.org/lite/inference_with_metadata/
         //            lite_support#imageprocessor_architecture
+
+        val width: Int = bitmapBuffer.width
+        val height: Int = bitmapBuffer.height
+
+        val size = if (height > width) width else height
+
         val imageProcessor =
             ImageProcessor.Builder()
+                .add( ResizeWithCropOrPadOp(size, size))
+                .add(
+                    ResizeOp(224, 224, ResizeOp.ResizeMethod.BILINEAR)
+                 )
                 .build()
 
         // Preprocess the image and convert it into a TensorImage for classification.

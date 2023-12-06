@@ -4,7 +4,12 @@ package com.lingoscan.compose.scan
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import android.view.Surface.ROTATION_0
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -77,23 +82,18 @@ fun ScanScreen(
     translatorProvider: TranslatorProvider
 ) {
     val showCameraView = remember { mutableStateOf(false) }
-    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
     Column {
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            onClick = {
-                if (!cameraPermissionState.status.isGranted) {
-                    cameraPermissionState.launchPermissionRequest()
-                } else {
-                    showCameraView.value = true
-                }
+        ScannerView(
+            onShowCameraView = {
+                showCameraView.value = true
+            }
+        )
 
-            }) {
-            Text(text = "Scan Image", fontSize = 20.sp)
-        }
+        ImagePickerView(
+            imageClassifierHelper = imageClassifierHelper
+        )
+
     }
 
     if (showCameraView.value) {
@@ -103,6 +103,101 @@ fun ScanScreen(
     }
 }
 
+@Composable
+fun ImagePickerView(
+    imageClassifierHelper: ImageClassifierHelper
+) {
+    var showScannedImage by remember { mutableStateOf(false) }
+
+    var imageUri by remember { mutableStateOf(Uri.EMPTY) }
+
+    var bitmapBuffer = remember<Bitmap?> { null }
+
+    val context = LocalContext.current.applicationContext
+
+    imageClassifierHelper.imageClassifierListener =
+        object : ImageClassifierHelper.ClassifierListener {
+            override fun onError(error: String) {
+                Log.w("mytag", "onError: $error")
+            }
+
+            override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
+                Log.w("mytag", "onResults: $results")
+                results.getString().let {
+                }
+            }
+        }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            imageUri = uri
+            bitmapBuffer = ImageUtils.getBitmap(context, uri)
+            showScannedImage = true
+            bitmapBuffer?.let {
+                imageClassifierHelper.classify(it)
+            }
+        }
+    }
+
+
+    Button(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        onClick = {
+            launcher.launch("image/*")
+        }) {
+        Text(text = "Pick Image", fontSize = 20.sp)
+    }
+
+    AnimatedVisibility(visible = showScannedImage, enter = scaleIn(), exit = fadeOut()) {
+        Image(
+            painter = rememberImagePainter(
+                data = imageUri
+            ),
+            contentDescription = "Captured Image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(30.dp)
+                .border(
+                    width = 2.dp,
+                    color = Color.White,
+                    shape = RoundedCornerShape(8.dp)
+                )
+        )
+
+//        LaunchedEffect(key1 = Unit) {
+//            delay(3000)
+//            showScannedImage = false
+//        }
+    }
+}
+
+@Composable
+fun ScannerView(
+    onShowCameraView: () -> Unit
+) {
+    val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+
+    Button(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        onClick = {
+            if (!cameraPermissionState.status.isGranted) {
+                cameraPermissionState.launchPermissionRequest()
+            } else {
+                onShowCameraView.invoke()
+            }
+
+        }) {
+        Text(text = "Scan Image", fontSize = 20.sp)
+    }
+}
 
 @Composable
 fun CameraView(
@@ -170,7 +265,7 @@ fun CameraView(
 
         val imageAnalyzer =
             ImageAnalysis.Builder()
-                .setTargetRotation(previewView.display.rotation)
+                .setTargetRotation(ROTATION_0)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
@@ -254,9 +349,7 @@ fun CameraView(
 
 
             AnimatedVisibility(
-                enter = scaleIn(
-                    initialScale = 0.5f
-                ),
+                enter = scaleIn(),
                 exit = fadeOut(),
                 visible = capturedImageUri != Uri.EMPTY) {
                 Image(
@@ -300,10 +393,12 @@ fun CameraSurface(
         Row {
             IconButton(onClick = onBackPress) {
                 Icon(
-                    modifier = Modifier.background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    ).padding(5.dp),
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape
+                        )
+                        .padding(5.dp),
                     painter = rememberVectorPainter(image = Icons.Default.ArrowBack),
                     tint = Color.White,
                     contentDescription = "BackButton"
