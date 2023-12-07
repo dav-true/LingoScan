@@ -23,7 +23,7 @@ class TranslatorProvider @Inject constructor() {
         this.targetLanguage = targetLanguage
     }
 
-    fun create(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun create(onStart: () -> Unit, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val options = TranslatorOptions.Builder()
             .setSourceLanguage(TranslateLanguage.ENGLISH)
             .setTargetLanguage(targetLanguage)
@@ -34,6 +34,9 @@ class TranslatorProvider @Inject constructor() {
             .build()
 
         translator.downloadModelIfNeeded(conditions)
+            .also{
+                onStart()
+            }
             .addOnSuccessListener {
                 onSuccess()
             }

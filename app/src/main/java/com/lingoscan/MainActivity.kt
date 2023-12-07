@@ -7,10 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.lingoscan.compose.scan.ScanScreen
 import com.lingoscan.ui.theme.LingoScanTheme
@@ -25,13 +22,17 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var imageClassifierHelper: ImageClassifierHelper
     @Inject
-    lateinit var tranlatorProvider: TranslatorProvider
+    lateinit var translatorProvider: TranslatorProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        tranlatorProvider.setTargetLanguage(TranslateLanguage.UKRAINIAN)
-        tranlatorProvider.create(
+        translatorProvider.setTargetLanguage(TranslateLanguage.UKRAINIAN)
+
+        translatorProvider.create(
+            onStart = {
+                Log.w("mytag", "model downloading started")
+            },
             onSuccess = {
                 Log.w("mytag", "model downloaded")
 
@@ -41,9 +42,7 @@ class MainActivity : ComponentActivity() {
 
             })
 
-
         setContent {
-
             LingoScanTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -52,7 +51,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     ScanScreen(
                         imageClassifierHelper = imageClassifierHelper,
-                        translatorProvider = tranlatorProvider
+                        translatorProvider = translatorProvider
                     )
                 }
             }
