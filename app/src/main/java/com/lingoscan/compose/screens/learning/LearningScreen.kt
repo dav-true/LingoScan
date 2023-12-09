@@ -1,10 +1,10 @@
-package com.lingoscan.compose.screens
+package com.lingoscan.compose.screens.learning
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 
 @Composable
-fun AccountScreen(
+fun LearningScreen(
     navController: NavController
 ) {
 

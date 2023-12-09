@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalPermissionsApi::class)
 
-package com.lingoscan.compose.screens
+package com.lingoscan.compose.screens.scan
 
 import android.graphics.Bitmap
 import android.net.Uri

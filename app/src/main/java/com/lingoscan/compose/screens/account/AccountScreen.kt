@@ -1,10 +1,10 @@
-package com.lingoscan.compose.screens
+package com.lingoscan.compose.screens.account
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 
 @Composable
-fun UploadedImageScreen(
+fun AccountScreen(
     navController: NavController
 ) {
 

@@ -1,19 +1,16 @@
 package com.lingoscan
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.google.mlkit.nl.translate.TranslateLanguage
-import com.lingoscan.compose.navigation.MainBottomNavigation
-import com.lingoscan.compose.navigation.MainNavigationGraph
+import com.lingoscan.compose.navigation.LingoBottomNavigation
+import com.lingoscan.compose.navigation.LingoNavigation
+import com.lingoscan.compose.navigation.LingoToolbar
 //import com.lingoscan.compose.screens.ScanScreen
 import com.lingoscan.ui.theme.LingoScanTheme
 import com.lingoscan.scan.utils.ImageClassifierHelper
@@ -38,12 +35,15 @@ class MainActivity : ComponentActivity() {
             LingoScanTheme {
                 // A surface container using the 'background' color from the theme
                 Scaffold(
+                    topBar = {
+                        LingoToolbar(navController = navController)
+                    },
                     bottomBar = {
-                        MainBottomNavigation(navController = navController)
+                        LingoBottomNavigation(navController = navController)
                     }
                 ) {
                     Surface(modifier = Modifier.padding(it)) {
-                        MainNavigationGraph(navController = navController)
+                        LingoNavigation(navController = navController)
                     }
                 }
             }
