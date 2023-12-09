@@ -39,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.lingoscan.compose.components.common.LanguageDownloadingDialog
+import com.lingoscan.compose.components.common.SelectLanguageButton
+import com.lingoscan.compose.components.common.SelectLanguageDialog
 import com.lingoscan.utils.translate.LanguageModel
 import com.lingoscan.viewmodels.ComposableViewModel
 
@@ -147,25 +150,12 @@ import com.lingoscan.viewmodels.ComposableViewModel
 
         Text(text = "Current selected language", style = MaterialTheme.typography.headlineSmall)
 
-        Row(modifier = Modifier
-            .border(
-                1.dp, color = Color.Black, shape = RoundedCornerShape(4.dp)
-            )
-            .clip(RoundedCornerShape(4.dp))
-            .clickable {
-                // Show dialog with all languages
-                onClick.invoke()
-            }
-            .padding(6.dp)) {
-
-            Text(text = languageModel.language, style = MaterialTheme.typography.bodyLarge)
-            Icon(
-                painter = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
-                contentDescription = null
-            )
-        }
+        SelectLanguageButton(language = languageModel.language, onClick = {
+            onClick.invoke()
+        })
     }
 }
+
 
 @Composable fun DownloadedLanguages(
     selectedLangage: LanguageModel,
@@ -214,80 +204,5 @@ import com.lingoscan.viewmodels.ComposableViewModel
         } else {
             Box(modifier = Modifier.size(42.dp))
         }
-    }
-}
-
-@Composable fun SelectLanguageDialog(
-    languages: List<LanguageModel>,
-    onLanguageSelected: (LanguageModel) -> Unit,
-    onDismissRequest: () -> Unit
-) {
-    Dialog(onDismissRequest = onDismissRequest) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 300.dp, max = 600.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                languages.forEach {
-                    LanguageSelectItem(
-                        languageModel = it,
-                        onLanguageSelected = onLanguageSelected,
-                        onDismissRequest = onDismissRequest
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable fun LanguageSelectItem(
-    languageModel: LanguageModel,
-    onLanguageSelected: (LanguageModel) -> Unit,
-    onDismissRequest: () -> Unit
-) {
-    Text(modifier = Modifier
-        .fillMaxWidth()
-        .clickable {
-            onLanguageSelected.invoke(languageModel)
-            onDismissRequest.invoke()
-        }
-        .padding(all = 10.dp),
-        text = languageModel.language,
-        style = MaterialTheme.typography.headlineSmall)
-    Divider(
-        thickness = 1.dp, color = Color.Gray, modifier = Modifier.padding(horizontal = 10.dp)
-    )
-}
-
-@Composable fun LanguageDownloadingDialog() {
-    Dialog(onDismissRequest = { }) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
-                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(75.dp)
-                        .padding(10.dp)
-                )
-                Text(
-                    text = "Downloading language...", style = MaterialTheme.typography.headlineSmall
-                )
-            }
-        }
-
     }
 }

@@ -16,6 +16,7 @@ class PersistentStorage @Inject constructor(
     companion object {
         const val LINGO_SCAN_PREFERENCES = "LINGO_SCAN_PREFS"
         const val PREF_TARGET_LANGUAGE = "TARGET_LANGUAGE_PREF"
+        const val PREF_FIRST_LAUNCH = "FIRST_LAUNCH_PREF"
     }
 
     private val sharePreferences: SharedPreferences by lazy {
@@ -26,7 +27,14 @@ class PersistentStorage @Inject constructor(
         get() = sharePreferences.getString(PREF_TARGET_LANGUAGE, TranslateLanguage.UKRAINIAN)
             ?: TranslateLanguage.UKRAINIAN
 
+    val isFirstLaunch: Boolean
+        get() = sharePreferences.getBoolean(PREF_FIRST_LAUNCH, true)
+
     fun setTargetLanguage(targetLanguage: String) {
         sharePreferences.edit().putString(PREF_TARGET_LANGUAGE, targetLanguage).apply()
+    }
+
+    fun setFirstLaunch(firstLaunch: Boolean) {
+        sharePreferences.edit().putBoolean(PREF_FIRST_LAUNCH, firstLaunch).apply()
     }
 }

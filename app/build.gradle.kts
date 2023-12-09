@@ -63,6 +63,7 @@ apply {
 
 dependencies {
 
+    // compose libs
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.1")
@@ -76,11 +77,10 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
 
     //camera x
-    val camerax_version = "1.3.0"
-    implementation("androidx.camera:camera-camera2:$camerax_version")
-    implementation("androidx.camera:camera-lifecycle:$camerax_version")
-    implementation("androidx.camera:camera-view:$camerax_version")
-    implementation("androidx.camera:camera-extensions:$camerax_version")
+    implementation("androidx.camera:camera-camera2:1.3.0")
+    implementation("androidx.camera:camera-lifecycle:1.3.0")
+    implementation("androidx.camera:camera-view:1.3.0")
+    implementation("androidx.camera:camera-extensions:1.3.0")
 
     //tensorflow lite
     implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.0")
@@ -96,17 +96,13 @@ dependencies {
     ksp("com.google.dagger:dagger-compiler:2.48.1")
     ksp("com.google.dagger:hilt-android-compiler:2.48.1")
 
-    //tranlsation
+    //translation
     implementation("com.google.mlkit:translate:17.0.2")
 
     //compose navigation
     implementation("androidx.navigation:navigation-compose:2.7.5")
 
-    //compose material
-//    implementation("androidx.compose.material:material:1.5.4")
-
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
