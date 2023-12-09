@@ -15,6 +15,7 @@ class TranslatorProvider @Inject constructor() {
     private lateinit var translator: Translator
     private var targetLanguage: String = TranslateLanguage.ENGLISH
 
+
     fun get() : Translator {
         return translator
     }

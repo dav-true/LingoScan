@@ -72,8 +72,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
+    //coil
     implementation("io.coil-kt:coil-compose:2.5.0")
-    implementation("androidx.navigation:navigation-compose:2.7.5")
 
     //camera x
     val camerax_version = "1.3.0"
@@ -88,7 +88,7 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.0")
     implementation("org.tensorflow:tensorflow-lite-gpu:2.9.0")
 
-    //permission
+    //compose permissions
     implementation("com.google.accompanist:accompanist-permissions:0.33.2-alpha")
 
     //dagger hilt
@@ -97,9 +97,13 @@ dependencies {
     ksp("com.google.dagger:hilt-android-compiler:2.48.1")
 
     //tranlsation
-
     implementation("com.google.mlkit:translate:17.0.2")
 
+    //compose navigation
+    implementation("androidx.navigation:navigation-compose:2.7.5")
+
+    //compose material
+//    implementation("androidx.compose.material:material:1.5.4")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
