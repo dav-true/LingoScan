@@ -13,24 +13,16 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -52,12 +43,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import com.lingoscan.compose.scan_components.ResultViewItem
-import com.lingoscan.compose.scan_components.ScannerFrame
-import com.lingoscan.scan.utils.ImageClassifierHelper
-import com.lingoscan.scan.utils.ImageUtils
-import com.lingoscan.scan.utils.getString
+import com.lingoscan.compose.components.scan.ResultViewItem
+import com.lingoscan.compose.components.scan.ScannerFrame
+import com.lingoscan.utils.scan.ImageClassifierHelper
+import com.lingoscan.utils.scan.ImageUtils
+import com.lingoscan.utils.scan.getString
 import com.lingoscan.utils.getCameraProvider
 import com.lingoscan.utils.useDebounce
 import com.lingoscan.viewmodels.ComposableViewModel
@@ -242,14 +232,15 @@ import java.util.concurrent.Executors
         ) {
             ScannerFrame(
                 modifier = Modifier
-                    .padding(bottom = 100.dp)
+                    .padding(bottom = 130.dp)
                     .fillMaxWidth(0.8f)
-                    .fillMaxHeight(0.5f)
+                    .fillMaxHeight(0.6f)
             )
         }
 
         resultText.takeIf { it.isNotBlank() }?.let {
             ResultViewItem(
+                modifier = Modifier.fillMaxSize(),
                 resultText = resultText,
                 translatedText = translatedText,
                 buttonText = "Capture",

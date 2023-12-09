@@ -1,9 +1,8 @@
-package com.lingoscan.compose.scan_components
+package com.lingoscan.compose.components.scan
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun ResultViewItem(
+    modifier: Modifier = Modifier,
     resultText: String,
     translatedText: String,
     buttonText: String,
@@ -31,7 +31,7 @@ fun ResultViewItem(
 ) {
     resultText.takeIf { it.isNotBlank() }?.let {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier,
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

@@ -13,6 +13,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
@@ -66,7 +67,11 @@ fun LingoScanTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = Typography.copy(
+            bodyMedium = Typography.bodyMedium.copy(fontSize = 16.sp),
+            bodyLarge = Typography.bodyLarge.copy(fontSize = 18.sp),
+            headlineSmall = Typography.headlineSmall.copy(fontSize = 22.sp),
+        ),
         content = content
     )
 }

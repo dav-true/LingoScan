@@ -1,4 +1,4 @@
-package com.lingoscan.scan.utils
+package com.lingoscan.utils.scan
 
 import android.content.Context
 import android.graphics.Bitmap

@@ -2,9 +2,7 @@
 
 package com.lingoscan.compose.screens.scan
 
-import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -34,10 +32,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.lingoscan.compose.navigation.Routes
-import com.lingoscan.scan.utils.ImageUtils
+import com.lingoscan.utils.scan.ImageUtils
 import com.lingoscan.ui.theme.Pink80
 import com.lingoscan.ui.theme.PinkRed80
-import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -56,10 +53,10 @@ fun ScanScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            uploadedImageUri = uri
-            val bitmap = ImageUtils.getBitmap(context, uri)
-
-            Log.w("mytag", bitmap.toString())
+             ImageUtils.getBitmap(context, uri)?.let { bitmap ->
+                 val bitmapCopyUri = ImageUtils.writeBitmapToFile(bitmap, context.filesDir)
+                 uploadedImageUri = bitmapCopyUri
+             }
         }
     }
 
@@ -70,10 +67,10 @@ fun ScanScreen(
     }
 
     LaunchedEffect(uploadedImageUri){
-//        uploadedImageUri?.let {
-//            val imageUri = URLEncoder.encode(it.toString(), StandardCharsets.UTF_8.toString())
-//            navController.navigate("${Routes.ScanScreen.UploadedImageScreen}/${imageUri}")
-//        }
+        uploadedImageUri?.let {
+            val imageUri = URLEncoder.encode(it.toString(), StandardCharsets.UTF_8.toString())
+            navController.navigate("${Routes.ScanScreen.UploadedImageScreen}/${imageUri}")
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -130,126 +127,3 @@ fun ScanScreen(
 fun ScanScreenPreview() {
     ScanScreen(navController = NavHostController(LocalContext.current))
 }
-
-//@Composable @OptIn(ExperimentalPermissionsApi::class) fun ScanScreen(
-//    imageClassifierHelper: ImageClassifierHelper, translatorProvider: TranslatorProvider
-//) {
-//    val showCameraView = remember { mutableStateOf(false) }
-//    val showUploadedImage = remember { mutableStateOf(false) }
-//
-//    val uploadedImageUri = remember { mutableStateOf(Uri.EMPTY) }
-////    val uploadedImageResultText = remember { mutableStateOf("") }
-////    val uploadedImageTranslatedText = remember { mutableStateOf("") }
-//
-//    var classifiedText by remember { mutableStateOf("") }
-//    var translatedText by remember { mutableStateOf("") }
-//
-//    imageClassifierHelper.imageClassifierListener =
-//        object : ImageClassifierHelper.ClassifierListener {
-//            override fun onError(error: String) {
-//            }
-//
-//            override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
-//                results.getString().let {
-//                    classifiedText = it
-//                }
-//            }
-//        }
-//
-//    translatorProvider.translate(classifiedText, onSuccess = {
-//        translatedText = it
-//    }, onFailure = {})
-//
-//
-//    Column {
-//        //Scanner button view
-//        ScannerButton(onShowCameraView = {
-//            showCameraView.value = true
-//        })
-//
-//        ImagePickerButton(imageClassifierHelper = imageClassifierHelper,
-//            translatorProvider = translatorProvider,
-//            onShowScannedImage = { imageUri, resultText, translatedText ->
-//                uploadedImageUri.value = imageUri
-////                uploadedImageResultText.value = resultText
-////                uploadedImageTranslatedText.value = translatedText
-////                showUploadedImage.value = true
-//            })
-//    }
-//
-//    // Scanner camera view
-//    if (showCameraView.value) {
-//        CameraView(
-//            imageClassifierHelper = imageClassifierHelper,
-//            translatorProvider = translatorProvider,
-//            onBackPress = {
-//                showCameraView.value = false
-//            })
-//    }
-//
-//    AnimatedVisibility(visible = showUploadedImage.value, enter = scaleIn(), exit = fadeOut()) {
-////        UploadedImageScreen(
-////            uploadedImageUri = uploadedImageUri.value,
-////            uploadedImageResultText = uploadedImageResultText.value,
-////            uploadedImageTranslatedText = uploadedImageTranslatedText.value,
-////            onBackPressed = { showUploadedImage.value = false }
-////        )
-//    }
-//}
-//
-//@Composable fun ImagePickerButton(
-//    imageClassifierHelper: ImageClassifierHelper,
-//    translatorProvider: TranslatorProvider,
-//    onShowScannedImage: (imageUri: Uri, resultText: String, translatedText: String) -> Unit
-//) {
-//    var imageUri by remember { mutableStateOf(Uri.EMPTY) }
-//    var bitmapBuffer by remember { mutableStateOf<Bitmap?>(null) }
-//
-////    var resultText by remember {
-////        mutableStateOf("")
-////    }
-//
-//    val context = LocalContext.current
-//
-////    imageClassifierHelper.imageClassifierListener =
-////        object : ImageClassifierHelper.ClassifierListener {
-////            override fun onError(error: String) {
-////                Log.w("mytag", "onError: $error")
-////            }
-////
-////            override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
-////                Log.w("mytag", "onResults: $results")
-////                results.getString().let {
-////                    resultText = it
-////                }
-////            }
-////        }
-//
-////    LaunchedEffect(resultText) {
-////        resultText.takeIf { it.isNotEmpty() }?.let {
-////            translatorProvider.translate(resultText, onSuccess = { translatedText ->
-////                onShowScannedImage.invoke(imageUri, resultText, translatedText)
-////            }, onFailure = {})
-////        }
-////    }
-//
-//    val launcher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.GetContent()
-//    ) { uri: Uri? ->
-//        uri?.let {
-//            imageUri = uri
-//            bitmapBuffer = ImageUtils.getBitmap(context, uri)
-//            bitmapBuffer?.let {
-//                imageClassifierHelper.classify(it)
-//            }
-//        }
-//    }
-//
-//    Button(modifier = Modifier
-//        .fillMaxWidth()
-//        .padding(10.dp), onClick = {
-//        launcher.launch("image/*")
-//    }) {
-//        Text(text = "Pick Image", fontSize = 20.sp)
-//    }
-//}

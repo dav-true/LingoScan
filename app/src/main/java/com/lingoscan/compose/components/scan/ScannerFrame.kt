@@ -1,4 +1,4 @@
-package com.lingoscan.compose.scan_components
+package com.lingoscan.compose.components.scan
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxHeight

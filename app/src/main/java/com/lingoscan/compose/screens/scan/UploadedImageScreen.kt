@@ -1,15 +1,12 @@
 package com.lingoscan.compose.screens.scan
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,14 +16,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.lingoscan.compose.scan_components.ResultViewItem
-import com.lingoscan.scan.utils.ImageClassifierHelper
-import com.lingoscan.scan.utils.ImageUtils
-import com.lingoscan.scan.utils.getString
+import com.lingoscan.compose.components.scan.ResultViewItem
+import com.lingoscan.utils.scan.ImageClassifierHelper
+import com.lingoscan.utils.scan.ImageUtils
+import com.lingoscan.utils.scan.getString
 import com.lingoscan.viewmodels.ComposableViewModel
 import org.tensorflow.lite.task.vision.classifier.Classifications
 
@@ -62,10 +60,10 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
         }
 
     LaunchedEffect(Unit) {
-//        val bitmap = ImageUtils.getBitmap(context, imageUri)
-//        bitmap?.let {
-//            imageClassifierHelper.classify(it)
-//        }
+        val bitmap = ImageUtils.getBitmap(context, imageUri)
+        bitmap?.let {
+            imageClassifierHelper.classify(it)
+        }
     }
 
     LaunchedEffect(resultText) {
@@ -76,27 +74,32 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
         }
     }
 
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color.White),
+        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
     ) {
-
         Image(
             painter = rememberAsyncImagePainter(
                 model = imageUri
-            ), contentDescription = "Captured Image", modifier = Modifier
-                .padding(30.dp)
-                .border(
-                    width = 2.dp, color = Color.White, shape = RoundedCornerShape(8.dp)
-                )
+            ),
+            contentDescription = "Captured Image",
+            modifier = Modifier
+                .weight(1f)
+                .padding(10.dp)
         )
-        ResultViewItem(resultText = resultText,
+        ResultViewItem(
+            resultText = resultText,
             translatedText = translatedText,
             buttonText = "Add to library",
             onButtonClick = {
-
             })
     }
+}
+
+@Preview
+@Composable
+fun UploadedImageScreenPreview() {
+    UploadedImageScreen(navController = NavController(LocalContext.current), imageUri = Uri.EMPTY)
 }

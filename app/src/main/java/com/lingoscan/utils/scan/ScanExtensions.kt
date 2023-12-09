@@ -1,4 +1,4 @@
-package com.lingoscan.scan.utils
+package com.lingoscan.utils.scan
 
 import org.tensorflow.lite.task.vision.classifier.Classifications
 

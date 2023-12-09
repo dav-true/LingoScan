@@ -13,6 +13,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.lingoscan.compose.screens.account.AccountScreen
+import com.lingoscan.compose.screens.account.LanguageSettingsScreen
 import com.lingoscan.compose.screens.scan.CameraScreen
 import com.lingoscan.compose.screens.scan.ScanScreen
 import com.lingoscan.compose.screens.scan.UploadedImageScreen
@@ -81,7 +83,14 @@ fun NavGraphBuilder.accountScreenGraph(
 ) {
     navigation(route = Routes.AccountScreen.route, startDestination = Routes.AccountScreen.Root) {
         composable(Routes.AccountScreen.Root) {
-            Text(text = "Account Screen")
+            AccountScreen(navController = navController)
+        }
+        composable(Routes.AccountScreen.AccountSettings) {
+            Text(text = "Account Settings")
+        }
+
+        composable(Routes.AccountScreen.LanguageSettings) {
+            LanguageSettingsScreen(navController = navController)
         }
     }
 }
@@ -108,5 +117,7 @@ sealed class Routes {
     object AccountScreen : Routes() {
         const val route = "account"
         const val Root = "account/screen"
+        const val AccountSettings = "account/screen/account_settings"
+        const val LanguageSettings = "account/screen/language_settings"
     }
 }
