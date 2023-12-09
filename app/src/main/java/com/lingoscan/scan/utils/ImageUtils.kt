@@ -13,6 +13,9 @@ import java.util.Locale
 import java.util.concurrent.Executor
 
 object ImageUtils {
+
+    const val filenameFormat: String = "yyyy-MM-dd-HH-mm-ss-SSS"
+
     fun takePhoto(
         filenameFormat: String = "yyyy-MM-dd-HH-mm-ss-SSS",
         imageCapture: ImageCapture,
@@ -47,6 +50,18 @@ object ImageUtils {
             resolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(inputStream)
         inputStream?.close()
+
         return bitmap
+    }
+
+    fun writeBitmapToFile(bitmap: Bitmap, outputDirectory: File): Uri {
+        val photoFile = File(
+            outputDirectory,
+            SimpleDateFormat(filenameFormat, Locale.US).format(System.currentTimeMillis()) + ".jpg"
+        )
+        photoFile.outputStream().use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+        }
+        return Uri.fromFile(photoFile)
     }
 }

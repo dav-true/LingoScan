@@ -8,6 +8,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -15,6 +17,9 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.lingoscan.ui.theme.Purple80
+import com.lingoscan.ui.theme.PurpleGrey80
+import com.lingoscan.ui.theme.ToolbarBackgroundColor
 import com.lingoscan.ui.theme.onBackgroundHighlighted
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +48,7 @@ fun LingoToolbar(
                 }
             }
         },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = ToolbarBackgroundColor),
         actions = { }
     )
 }

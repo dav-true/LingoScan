@@ -1,4 +1,4 @@
-package com.lingoscan.compose.scan
+package com.lingoscan.compose.screens.scan
 
 import android.graphics.Bitmap
 import android.net.Uri
@@ -48,38 +48,47 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import com.lingoscan.compose.scan_components.ResultViewItem
+import com.lingoscan.compose.scan_components.ScannerFrame
 import com.lingoscan.scan.utils.ImageClassifierHelper
 import com.lingoscan.scan.utils.ImageUtils
 import com.lingoscan.scan.utils.getString
-import com.lingoscan.translate.utils.TranslatorProvider
 import com.lingoscan.utils.getCameraProvider
 import com.lingoscan.utils.useDebounce
+import com.lingoscan.viewmodels.ComposableViewModel
 import kotlinx.coroutines.delay
 import org.tensorflow.lite.task.vision.classifier.Classifications
 import java.util.concurrent.Executors
 
 
-@Composable fun CameraView(
-    imageClassifierHelper: ImageClassifierHelper,
-    translatorProvider: TranslatorProvider,
-    onBackPress: () -> Unit
+@Composable fun CameraScreen(
+    navController: NavHostController
 ) {
-    val context = LocalContext.current
-    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
-    val executor = remember { Executors.newSingleThreadExecutor() }
+    val composableViewModel = hiltViewModel<ComposableViewModel>()
+    val imageClassifierHelper = composableViewModel.imageClassifierHelper
+    val translatorHelper = composableViewModel.translatorHelper
 
     val initializeBitmapBuffer = remember { mutableStateOf(false) }
     var bitmapBuffer = remember { Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888) }
 
-    val lensFacing = CameraSelector.LENS_FACING_BACK
+    //Camera surface properties
+    val context = LocalContext.current
+    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+    val executor = remember { Executors.newSingleThreadExecutor() }
 
+    val lensFacing = CameraSelector.LENS_FACING_BACK
     val preview = Preview.Builder().build()
     val previewView = remember { PreviewView(context) }
     val imageCapture: ImageCapture = remember { ImageCapture.Builder().build() }
     val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+    //endregion
 
+    // Result states
     var detectedResult by remember() {
         mutableStateOf("")
     }
@@ -94,7 +103,7 @@ import java.util.concurrent.Executors
         mutableStateOf("")
     }
 
-    resultTextDerivedState.value.useDebounce(delayMillis = 1200,
+    resultTextDerivedState.value.useDebounce(delayMillis = 1000,
         delayCondition = resultTextDerivedState.value.isBlank(),
         onChange = {
             resultText = it
@@ -108,15 +117,17 @@ import java.util.concurrent.Executors
         mutableStateOf(Uri.EMPTY)
     }
 
-
     LaunchedEffect(resultText) {
-        translatorProvider.translate(resultText, onSuccess = {
+        translatorHelper.translate(resultText, onSuccess = {
             translatedText = it
         }, onFailure = {
             Log.w("mytag", it.message.toString())
         })
     }
+    //endregion
 
+
+    //Camera setup
     LaunchedEffect(lensFacing) {
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
@@ -144,8 +155,10 @@ import java.util.concurrent.Executors
 
         preview.setSurfaceProvider(previewView.surfaceProvider)
     }
+    //endregion
 
 
+    // Image classifier listener setup
     imageClassifierHelper.imageClassifierListener =
         object : ImageClassifierHelper.ClassifierListener {
             override fun onError(error: String) {
@@ -159,7 +172,9 @@ import java.util.concurrent.Executors
                 }
             }
         }
+    //endregion
 
+    // Camera preview + camera surface + result view
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding: PaddingValues ->
         Box(
             modifier = Modifier
@@ -181,7 +196,7 @@ import java.util.concurrent.Executors
                     })
             }, onBackPress = {
                 executor.shutdownNow()
-                onBackPress.invoke()
+                navController.popBackStack()
             })
 
 
@@ -189,8 +204,8 @@ import java.util.concurrent.Executors
                 enter = scaleIn(), exit = fadeOut(), visible = capturedImageUri != Uri.EMPTY
             ) {
                 Image(
-                    painter = rememberImagePainter(
-                        data = capturedImageUri
+                    painter = rememberAsyncImagePainter(
+                        model = capturedImageUri
                     ),
                     contentDescription = "Captured Image",
                     contentScale = ContentScale.Crop,
@@ -209,8 +224,8 @@ import java.util.concurrent.Executors
             }
 
         }
-
     }
+    //endregion
 }
 
 @Composable fun CameraSurface(
@@ -219,21 +234,6 @@ import java.util.concurrent.Executors
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-
-        Row {
-            IconButton(onClick = onBackPress) {
-                Icon(
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.primary, shape = CircleShape
-                        )
-                        .padding(5.dp),
-                    painter = rememberVectorPainter(image = Icons.Default.ArrowBack),
-                    tint = Color.White,
-                    contentDescription = "BackButton"
-                )
-            }
-        }
 
         Column(
             modifier = Modifier.fillMaxSize(),

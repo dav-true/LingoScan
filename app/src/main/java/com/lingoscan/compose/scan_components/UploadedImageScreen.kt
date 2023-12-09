@@ -1,11 +1,10 @@
-package com.lingoscan.compose.scan
+package com.lingoscan.compose.scan_components
 
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.lingoscan.compose.Toolbar
+//import com.lingoscan.compose.Toolbar
 
 
 @Composable
@@ -29,12 +28,7 @@ fun UploadedImageScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        Toolbar(
-            showBackButton = true,
-            onBackPress = {
-                onBackPressed()
-            },
-        )
+
         Image(
             painter = rememberAsyncImagePainter(
                 model = uploadedImageUri

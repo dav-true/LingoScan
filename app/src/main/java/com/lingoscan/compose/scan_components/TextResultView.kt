@@ -1,4 +1,4 @@
-package com.lingoscan.compose.scan
+package com.lingoscan.compose.scan_components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

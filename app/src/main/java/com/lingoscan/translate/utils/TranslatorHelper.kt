@@ -1,6 +1,5 @@
 package com.lingoscan.translate.utils
 
-import android.util.Log
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
@@ -10,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TranslatorProvider @Inject constructor() {
+class TranslatorHelper @Inject constructor() {
 
     private lateinit var translator: Translator
     private var targetLanguage: String = TranslateLanguage.ENGLISH
