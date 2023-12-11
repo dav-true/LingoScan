@@ -3,7 +3,6 @@
 package com.lingoscan.compose.screens.scan
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -38,7 +37,6 @@ import com.lingoscan.utils.scan.ImageUtils
 import com.lingoscan.ui.theme.Pink80
 import com.lingoscan.ui.theme.PinkRed80
 import com.lingoscan.viewmodels.MainViewModel
-import java.io.File
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -72,8 +70,8 @@ fun ScanScreen(
 
     LaunchedEffect(uploadedImageUri){
         uploadedImageUri?.let {
-            val imageUri = URLEncoder.encode(it.toString(), StandardCharsets.UTF_8.toString())
-            navController.navigate("${Routes.ScanScreen.UploadedImageScreen}/${imageUri}")
+            val encodedUri = URLEncoder.encode(it.toString(), StandardCharsets.UTF_8.toString())
+            navController.navigate("${Routes.ScanScreen.UploadedImageScreen}/${encodedUri}")
         }
     }
 

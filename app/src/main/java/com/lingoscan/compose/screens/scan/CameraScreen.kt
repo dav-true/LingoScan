@@ -3,7 +3,8 @@ package com.lingoscan.compose.screens.scan
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import android.view.Surface
+import android.view.Surface.ROTATION_0
+import android.view.Surface.ROTATION_90
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -45,6 +46,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.lingoscan.compose.components.scan.ResultViewItem
 import com.lingoscan.compose.components.scan.ScannerFrame
+import com.lingoscan.compose.navigation.Routes
 import com.lingoscan.utils.scan.ImageClassifierHelper
 import com.lingoscan.utils.scan.ImageUtils
 import com.lingoscan.utils.scan.getString
@@ -53,6 +55,8 @@ import com.lingoscan.utils.useDebounce
 import com.lingoscan.viewmodels.ComposableViewModel
 import kotlinx.coroutines.delay
 import org.tensorflow.lite.task.vision.classifier.Classifications
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executors
 
 
@@ -122,10 +126,12 @@ import java.util.concurrent.Executors
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
 
-        val imageAnalyzer = ImageAnalysis.Builder().setTargetRotation(Surface.ROTATION_0)
+        val imageAnalyzer = ImageAnalysis.Builder().setTargetRotation(ROTATION_0)
+            .setOutputImageRotationEnabled(true)
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888).build().also {
                 it.setAnalyzer(executor) { imageProxy ->
+
                     if (!initializeBitmapBuffer.value) {
                         bitmapBuffer = Bitmap.createBitmap(
                             imageProxy.width, imageProxy.height, Bitmap.Config.ARGB_8888
@@ -134,10 +140,11 @@ import java.util.concurrent.Executors
                     }
 
                     imageClassifierHelper.classify(
-                        imageProxy, bitmapBuffer, previewView.display.rotation
+                        imageProxy, bitmapBuffer, ROTATION_90
                     )
                 }
             }
+
 
         cameraProvider.bindToLifecycle(
             lifecycleOwner, cameraSelector, preview, imageCapture, imageAnalyzer
@@ -156,7 +163,6 @@ import java.util.concurrent.Executors
             }
 
             override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
-                Log.w("mytag", "onResults: $results")
                 results.getString().let {
                     detectedResult = it
                 }
@@ -164,6 +170,13 @@ import java.util.concurrent.Executors
         }
     //endregion
 
+    LaunchedEffect(capturedImageUri) {
+        capturedImageUri.takeIf { it.toString().isNotBlank() }?.let {
+            executor.shutdownNow()
+            val encodedUri = URLEncoder.encode(it.toString(), StandardCharsets.UTF_8.toString())
+            navController.navigate("${Routes.ScanScreen.UploadedImageScreen}/${encodedUri}")
+        }
+    }
     // Camera preview + camera surface + result view
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding: PaddingValues ->
         Box(
@@ -188,30 +201,6 @@ import java.util.concurrent.Executors
                 executor.shutdownNow()
                 navController.popBackStack()
             })
-
-
-            AnimatedVisibility(
-                enter = scaleIn(), exit = fadeOut(), visible = capturedImageUri != Uri.EMPTY
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = capturedImageUri
-                    ),
-                    contentDescription = "Captured Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(30.dp)
-                        .border(
-                            width = 2.dp, color = Color.White, shape = RoundedCornerShape(8.dp)
-                        )
-                )
-
-                LaunchedEffect(key1 = Unit) {
-                    delay(3000)
-                    capturedImageUri = Uri.EMPTY
-                }
-            }
 
         }
     }

@@ -86,7 +86,7 @@ class ImageClassifierHelper @Inject constructor(
     }
 
     fun classify(bitmap: Bitmap) {
-        classify(null, bitmap, 1)
+        classify(null, bitmap, Surface.ROTATION_90)
     }
 
     fun classify(imageProxy: ImageProxy?, bitmapBuffer: Bitmap, rotation: Int) {

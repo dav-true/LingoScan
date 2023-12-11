@@ -4,17 +4,19 @@ import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.util.Base64
-import android.util.Log
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.lang.Exception
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.Executor
+
 
 object ImageUtils {
 
@@ -45,7 +47,9 @@ object ImageUtils {
                 }
 
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    rotateBitmapIfNeeded(photoFile)
                     val savedUri = Uri.fromFile(photoFile)
+
                     onImageCaptured(savedUri)
                 }
             })
@@ -75,10 +79,9 @@ object ImageUtils {
 
     fun getBase64FromPath(path: String): String {
         val absolutePath = Uri.parse(path).path.orEmpty()
-        Log.w("mytag-absolute", absolutePath)
         val bm = BitmapFactory.decodeFile(absolutePath)
         val baos = ByteArrayOutputStream()
-        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos) // bm is the bitmap object
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT)
     }
 
@@ -91,5 +94,40 @@ object ImageUtils {
         ) {
             null
         }
+    }
+
+
+    private fun rotateBitmapIfNeeded(file: File) {
+        val exif = ExifInterface(file.absolutePath)
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
+
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        val rotatedBitmap = when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> {
+                rotateImage(bitmap, 90f)
+            }
+            ExifInterface.ORIENTATION_ROTATE_180 -> {
+                rotateImage(bitmap, 180f)
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> {
+                rotateImage(bitmap, 270f)
+            }
+            else -> {
+                bitmap
+            }
+        }
+
+        val outputStream = FileOutputStream(file)
+        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        outputStream.close()
+    }
+
+    private fun rotateImage(source: Bitmap, angle: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height,
+            matrix, true
+        )
     }
 }
