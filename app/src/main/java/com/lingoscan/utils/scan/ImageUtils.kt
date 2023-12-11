@@ -5,9 +5,13 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Base64
+import android.util.Log
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.Executor
@@ -32,19 +36,22 @@ object ImageUtils {
 
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-        imageCapture.takePicture(outputOptions, executor, object: ImageCapture.OnImageSavedCallback {
-            override fun onError(exception: ImageCaptureException) {
-                onError(exception)
-            }
+        imageCapture.takePicture(
+            outputOptions,
+            executor,
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onError(exception: ImageCaptureException) {
+                    onError(exception)
+                }
 
-            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                val savedUri = Uri.fromFile(photoFile)
-                onImageCaptured(savedUri)
-            }
-        })
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    val savedUri = Uri.fromFile(photoFile)
+                    onImageCaptured(savedUri)
+                }
+            })
     }
 
-    fun getBitmap(context: Context, uri: Uri):Bitmap?{
+    fun getBitmap(context: Context, uri: Uri): Bitmap? {
         val resolver: ContentResolver = context.contentResolver
         val inputStream =
             resolver.openInputStream(uri)
@@ -63,5 +70,26 @@ object ImageUtils {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
         }
         return Uri.fromFile(photoFile)
+    }
+
+
+    fun getBase64FromPath(path: String): String {
+        val absolutePath = Uri.parse(path).path.orEmpty()
+        Log.w("mytag-absolute", absolutePath)
+        val bm = BitmapFactory.decodeFile(absolutePath)
+        val baos = ByteArrayOutputStream()
+        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos) // bm is the bitmap object
+        return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT)
+    }
+
+    fun getBitmapFromBase64(base64string: String): Bitmap? {
+        return try {
+            val byteArray = Base64.decode(base64string, Base64.DEFAULT)
+            return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        } catch (
+            _: Exception
+        ) {
+            null
+        }
     }
 }

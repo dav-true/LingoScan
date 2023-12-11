@@ -1,5 +1,6 @@
 package com.lingoscan.compose.components.library
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -11,19 +12,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.lingoscan.R
 import com.lingoscan.presentations.WordPresentation
+import com.lingoscan.utils.scan.ImageUtils
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -35,7 +38,11 @@ fun WordItem(
 ) {
 
     Card(
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
         shape = RoundedCornerShape(10.dp),
+        border = BorderStroke(1.dp, Color.Black),
         modifier = modifier
             .padding(10.dp)
             .clip(RoundedCornerShape(10.dp))
@@ -47,22 +54,28 @@ fun WordItem(
         Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            if (presentation.image.isNotBlank()) {
+
+            val imageBitmap = presentation.image.takeIf { it.isNotBlank() }?.let {
+                ImageUtils.getBitmapFromBase64(presentation.image)?.asImageBitmap()
+            }
+            if (imageBitmap != null) {
                 Image(
                     modifier = Modifier
                         .height(150.dp)
                         .wrapContentWidth()
                         .align(alignment = Alignment.CenterHorizontally),
-                    painter = rememberAsyncImagePainter(model = presentation.image),
+                    bitmap = imageBitmap,
                     contentDescription = null
                 )
+
             } else {
                 Image(
                     modifier = Modifier
+                        .padding(10.dp)
                         .height(150.dp)
                         .wrapContentWidth()
                         .align(alignment = Alignment.CenterHorizontally),
-                    painter = painterResource(id = R.drawable.ic_google),
+                    painter = painterResource(id = R.drawable.dictionary_placeholder),
                     contentDescription = null
                 )
             }
@@ -88,8 +101,8 @@ fun WordItemPreview() {
         presentation = WordPresentation(
             id = "",
             name = "Hello",
-            translation = "Привет",
-            language = "RU",
+            translation = "Привіт",
+            language = "UA",
             image = ""
         ),
         onClick = {},

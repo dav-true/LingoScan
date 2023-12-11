@@ -124,7 +124,7 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
                 dictionaryId = it.id,
                 name = resultText,
                 translation = translatedText,
-                image = imageUri.toString()
+                image = ImageUtils.getBase64FromPath(imageUri.toString())
             )
         })
     }

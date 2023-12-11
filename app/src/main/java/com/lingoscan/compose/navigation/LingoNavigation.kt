@@ -54,7 +54,6 @@ fun NavGraphBuilder.scanScreenGraph(
             }
         )) { entry ->
             val imageUri = URLDecoder.decode(entry.arguments?.getString("imageUri"), StandardCharsets.UTF_8.toString())
-
             UploadedImageScreen(navController = navController, imageUri = imageUri.toUri())
         }
     }
