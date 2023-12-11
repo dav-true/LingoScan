@@ -11,7 +11,7 @@ interface MongoRepository {
     fun getDictionaries(currentLanguage: String): Flow<List<Dictionary>>
     suspend fun addDictionary(dictionary: Dictionary)
     suspend fun updateDictionary(dictionary: Dictionary)
-    suspend fun deleteDictionary(id: ObjectId)
+    suspend fun deleteDictionary(id: String)
 
     suspend fun addWord(word: Word, dictionaryId: String)
 
@@ -20,4 +20,10 @@ interface MongoRepository {
     suspend fun deleteWord(word: Word)
 
     suspend fun getWords(dictionaryId: String): Flow<List<Word>>
+
+    suspend fun deleteAllWordsFromDictionary()
+
+    suspend fun createDictionaryWithWord(dictionary: Dictionary, word: Word)
+
+    suspend fun deleteAllDictionaries()
 }

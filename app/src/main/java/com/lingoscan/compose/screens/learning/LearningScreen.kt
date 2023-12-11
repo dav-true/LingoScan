@@ -33,6 +33,16 @@ import com.lingoscan.viewmodels.MainViewModel
         TextField(value = textFieldValue, onValueChange = {
             textFieldValue = it
         } )
+
+
+        Button(onClick = { mainViewModel.deleteAllWordsFromDicitionary() }) {
+            Text(text = "Delete all words")
+        }
+
+
+        Button(onClick = { mainViewModel.deleteAllDictionaries() }) {
+            Text(text = "Delete all dicts")
+        }
     }
 
 }

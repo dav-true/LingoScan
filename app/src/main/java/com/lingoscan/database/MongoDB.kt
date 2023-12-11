@@ -5,6 +5,7 @@ import com.lingoscan.Constants
 import com.lingoscan.model.Dictionary
 //import com.lingoscan.model.User
 import com.lingoscan.model.Word
+import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.copyFromRealm
@@ -12,7 +13,9 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
+import io.realm.kotlin.query.find
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import org.mongodb.kbson.ObjectId
 import javax.inject.Inject
@@ -42,15 +45,25 @@ class MongoDB @Inject constructor() : MongoRepository {
         }
     }
 
-    override fun getDictionaries(currentLanguage: String): Flow<List<Dictionary>> {
-        return realm.query<Dictionary>().query("language == $0", currentLanguage).asFlow().map { it.list }
+    override suspend fun getWords(dictionaryId: String): Flow<List<Word>> {
+        return realm.query<Dictionary>().query("_id == $0", ObjectId(dictionaryId)).first().asFlow()
+            .map {
+                it.obj?.words.orEmpty()
+            }
     }
 
-    override suspend fun addDictionary(dictionary: Dictionary) {
+    override fun getDictionaries(currentLanguage: String): Flow<List<Dictionary>> {
+        return realm.query<Dictionary>().query("language == $0", currentLanguage).asFlow()
+            .map { it.list }
+    }
+
+    override suspend fun addWord(
+        word: Word, dictionaryId: String
+    ) {
         if (user != null) {
             realm.write {
                 try {
-                    copyToRealm(dictionary.apply { owner_id = user.id })
+                    addWordToDictionary(ObjectId(dictionaryId), word)
                 } catch (e: Exception) {
                     Log.d("MongoRepository", e.message.toString())
                 }
@@ -58,25 +71,75 @@ class MongoDB @Inject constructor() : MongoRepository {
         }
     }
 
-    override suspend fun updateDictionary(dictionary: Dictionary) {
+    override suspend fun deleteAllWordsFromDictionary() {
+        realm.write {
+            try {
+                realm.query<Word>().find { results ->
+                    results.forEach { word ->
+                        findLatest(word)?.let {
+                            delete(it)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("MongoRepository", e.message.toString())
+            }
+        }
     }
 
-    override suspend fun deleteDictionary(id: ObjectId) {
+    override suspend fun deleteAllDictionaries() {
+        realm.write {
+            try {
+                realm.query<Dictionary>().find { results ->
+                    results.forEach { dictionary ->
+                        findLatest(dictionary)?.let {
+                            delete(it)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("MongoRepository", e.message.toString())
+            }
+        }
     }
 
-    override suspend fun addWord(
-        word: Word, dictionaryId: String
-    ) {
+
+    override suspend fun addDictionary(dictionary: Dictionary) {
         if (user != null) {
 
             realm.write {
                 try {
-                    val dict = realm.query<Dictionary>().query("_id == $0", ObjectId(dictionaryId)).first()
-                        .find()?.let {
-                            findLatest(it)?.apply {
-                                words.add(word.apply { owner_id = user.id })
-                            }?.let { latest ->
-                                copyToRealm(latest)
+                    val createdDictionary = copyToRealm(dictionary.apply { owner_id = user.id })
+
+                    createdDictionary.words.firstOrNull()?.let {
+                        addWordToDictionary(createdDictionary._id, it)
+                    }
+
+                } catch (e: Exception) {
+                    Log.d("MongoRepository", e.message.toString())
+                }
+            }
+
+        }
+    }
+
+    override suspend fun updateDictionary(dictionary: Dictionary) {
+    }
+
+    override suspend fun deleteDictionary(id: String) {
+        if(user != null) {
+            realm.write {
+                try {
+                    realm.query<Dictionary>().query("_id == $0", ObjectId(id)).first().find()
+                        ?.let { dictionary ->
+                            dictionary.words.forEach {
+                                findLatest(it)?.let { latest ->
+                                    delete(latest)
+                                }
+                            }
+
+                            findLatest(dictionary)?.let { latest ->
+                                delete(latest)
                             }
                         }
                 } catch (e: Exception) {
@@ -90,11 +153,37 @@ class MongoDB @Inject constructor() : MongoRepository {
     }
 
     override suspend fun deleteWord(word: Word) {
+
     }
 
-    override suspend fun getWords(dictionaryId: String): Flow<List<Word>> {
-        return realm.query<Dictionary>().query("_id == $0", ObjectId(dictionaryId)).first().asFlow().map {
-            it.obj?.words.orEmpty()
+    override suspend fun createDictionaryWithWord(dictionary: Dictionary, word: Word) {
+        if (user != null) {
+            realm.write {
+                try {
+                    val createdDictionary = copyToRealm(dictionary.apply { owner_id = user.id })
+
+                    createdDictionary.words.add(word.apply { owner_id = user.id })
+
+                    copyToRealm(createdDictionary)
+                } catch (e: Exception) {
+                    Log.d("MongoRepository", e.message.toString())
+                }
+            }
+        }
+    }
+
+    private fun MutableRealm.addWordToDictionary(dictionaryId: ObjectId, word: Word) {
+        if(user != null) {
+            realm.query<Dictionary>()
+                .query("_id == $0", dictionaryId)
+                .first()
+                .find()?.let {
+                    findLatest(it)?.apply {
+                        words.add(word.apply { owner_id = user.id })
+                    }?.let { latest ->
+                        copyToRealm(latest)
+                    }
+                }
         }
     }
 }

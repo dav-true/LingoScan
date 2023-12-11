@@ -7,9 +7,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.lingoscan.compose.components.common.CreateDictionaryDialog
 import com.lingoscan.compose.navigation.AuthNavigation
 import com.lingoscan.compose.navigation.LingoBottomNavigation
 import com.lingoscan.compose.navigation.LingoNavigation
@@ -19,6 +25,7 @@ import com.lingoscan.ui.theme.LingoScanTheme
 import com.lingoscan.utils.preferences.PersistentStorage
 import com.lingoscan.utils.scan.ImageClassifierHelper
 import com.lingoscan.utils.translate.TranslatorHelper
+import com.lingoscan.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -57,9 +64,19 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(
     navController: NavHostController
 ) {
+    var showCreateDictionaryDialog by remember {
+        mutableStateOf(false)
+    }
+
+    val mainViewModel = hiltViewModel<MainViewModel>()
+
     Scaffold(
         topBar = {
-            LingoToolbar(navController = navController)
+            LingoToolbar(
+                navController = navController,
+                onCreateDictionary = {
+                    showCreateDictionaryDialog = true
+                })
         },
         bottomBar = {
             LingoBottomNavigation(navController = navController)
@@ -68,5 +85,17 @@ fun MainScreen(
         Surface(modifier = Modifier.padding(it)) {
             LingoNavigation(navController = navController)
         }
+    }
+
+    if (showCreateDictionaryDialog) {
+        CreateDictionaryDialog(
+            onDismissRequest = {
+                showCreateDictionaryDialog = false
+            },
+            onCreateDictionary = {
+                mainViewModel.createDictionary(name = it)
+                showCreateDictionaryDialog = false
+            }
+        )
     }
 }

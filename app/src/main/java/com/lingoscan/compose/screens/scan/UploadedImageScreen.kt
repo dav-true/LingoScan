@@ -2,6 +2,7 @@ package com.lingoscan.compose.screens.scan
 
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +34,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.lingoscan.compose.components.common.CreateDictionaryDialog
+import com.lingoscan.compose.components.common.SelectDictionaryDialog
 import com.lingoscan.compose.components.scan.ResultViewItem
 import com.lingoscan.presentations.DictionaryPresentation
 import com.lingoscan.utils.scan.ImageClassifierHelper
@@ -54,6 +57,10 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
         mutableStateOf(false)
     }
 
+    var showCreateDictionaryDialog by remember {
+        mutableStateOf(false)
+    }
+
     val dictionaries by mainViewModel.dictionaries.collectAsState()
 
     var resultText by remember {
@@ -62,6 +69,16 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
 
     var translatedText by remember {
         mutableStateOf("")
+    }
+
+    var resultButtonText by remember {
+        mutableStateOf("Add to library")
+    }
+
+    var resultButtonClick by remember {
+        mutableStateOf({
+            showSelectDictionaryDialog = true
+        })
     }
 
     val context = LocalContext.current
@@ -116,6 +133,7 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
     }
 
     if (showSelectDictionaryDialog) {
+
         mainViewModel.getDictionaries()
         SelectDictionaryDialog(dictionaries = dictionaries.orEmpty(), onDismissRequest = {
             showSelectDictionaryDialog = false
@@ -126,59 +144,29 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
                 translation = translatedText,
                 image = ImageUtils.getBase64FromPath(imageUri.toString())
             )
+            Toast.makeText(context, "Word was added to dictionary!", Toast.LENGTH_LONG).show()
+        }, onCreateDictionary = {
+            showSelectDictionaryDialog = false
+            showCreateDictionaryDialog = true
+        })
+    }
+
+    if (showCreateDictionaryDialog) {
+        CreateDictionaryDialog(onDismissRequest = {
+            showCreateDictionaryDialog = false
+        }, onCreateDictionary = { dictionaryName ->
+            mainViewModel.createDictionaryAndAddWord(
+                dictionaryName = dictionaryName,
+                wordName = resultText,
+                translation = translatedText,
+                image = ImageUtils.getBase64FromPath(imageUri.toString())
+            )
         })
     }
 }
 
 
-@Composable fun SelectDictionaryDialog(
-    dictionaries: List<DictionaryPresentation>,
-    onDismissRequest: () -> Unit,
-    onSelectDictionary: (DictionaryPresentation) -> Unit
-) {
-    Dialog(onDismissRequest = onDismissRequest) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 300.dp, max = 600.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                dictionaries.forEach {
-                    SelectDictionaryItem(
-                        dictionary = it,
-                        onDictionarySelected = onSelectDictionary,
-                        onDismissRequest = onDismissRequest
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-@Composable fun SelectDictionaryItem(
-    dictionary: DictionaryPresentation,
-    onDictionarySelected: (DictionaryPresentation) -> Unit,
-    onDismissRequest: () -> Unit
-) {
-    Text(modifier = Modifier
-        .fillMaxWidth()
-        .clickable {
-            onDictionarySelected.invoke(dictionary)
-            onDismissRequest.invoke()
-        }
-        .padding(all = 10.dp),
-        text = dictionary.name,
-        style = MaterialTheme.typography.headlineSmall)
-    Divider(
-        thickness = 1.dp, color = Color.Gray, modifier = Modifier.padding(horizontal = 10.dp)
-    )
-}
-
-@Preview @Composable fun UploadedImageScreenPreview() {
+@Preview
+@Composable fun UploadedImageScreenPreview() {
     UploadedImageScreen(navController = NavController(LocalContext.current), imageUri = Uri.EMPTY)
 }

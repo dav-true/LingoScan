@@ -52,6 +52,28 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun createDictionaryAndAddWord(
+        dictionaryName: String,
+        wordName: String,
+        translation: String,
+        image: String
+    ) {
+        viewModelScope.launch {
+            mongoDB.createDictionaryWithWord(
+                Dictionary().apply {
+                    this.name = dictionaryName
+                    language = persistentStorage.targetLanguage
+                },
+                Word().apply {
+                    this.language = persistentStorage.targetLanguage
+                    this.name = wordName
+                    this.translation = translation
+                    this.image = image
+                }
+            )
+        }
+    }
+
     fun getWords(dictionaryId: String) {
         viewModelScope.launch {
             mongoDB.getWords(dictionaryId).collectLatest {
@@ -76,6 +98,25 @@ class MainViewModel @Inject constructor(
                 },
                 dictionaryId = dictionaryId
             )
+        }
+    }
+
+    fun deleteAllWordsFromDicitionary() {
+        viewModelScope.launch {
+            mongoDB.deleteAllWordsFromDictionary()
+        }
+    }
+
+    fun deleteAllDictionaries() {
+        viewModelScope.launch {
+            mongoDB.deleteAllDictionaries()
+        }
+    }
+
+    fun deleteDictionary(id: String) {
+        viewModelScope.launch {
+            mongoDB.deleteDictionary(id)
+            getDictionaries()
         }
     }
 }

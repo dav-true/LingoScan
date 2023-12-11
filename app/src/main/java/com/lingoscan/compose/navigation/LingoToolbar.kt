@@ -1,6 +1,7 @@
 package com.lingoscan.compose.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,13 +27,15 @@ import com.lingoscan.ui.theme.onBackgroundHighlighted
 @Composable
 fun LingoToolbar(
     navController: NavHostController,
+    onCreateDictionary: () -> Unit
 ) {
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     val currentRootScreen = currentBackStackEntry?.destination?.parent?.route
     val currentDestination = currentBackStackEntry?.destination?.route
 
-    val rootScreen = BottomNavigationItems.entries.map { it.rootScreen }.contains(currentDestination)
+    val rootScreen =
+        BottomNavigationItems.entries.map { it.rootScreen }.contains(currentDestination)
 
     val title = currentRootScreen?.capitalize(Locale.current)
 
@@ -49,7 +52,16 @@ fun LingoToolbar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = ToolbarBackgroundColor),
-        actions = { }
+        actions = {
+            if (currentDestination == Routes.LibraryScreen.Root) {
+                IconButton(onClick = onCreateDictionary) {
+                    Icon(
+                        painter = rememberVectorPainter(image = Icons.Default.Add),
+                        contentDescription = null
+                    )
+                }
+            }
+        }
     )
 }
 
