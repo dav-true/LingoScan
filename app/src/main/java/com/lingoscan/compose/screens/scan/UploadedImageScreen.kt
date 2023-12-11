@@ -37,6 +37,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.lingoscan.compose.components.common.CreateDictionaryDialog
 import com.lingoscan.compose.components.common.SelectDictionaryDialog
 import com.lingoscan.compose.components.scan.ResultViewItem
+import com.lingoscan.compose.navigation.Routes
 import com.lingoscan.presentations.DictionaryPresentation
 import com.lingoscan.utils.scan.ImageClassifierHelper
 import com.lingoscan.utils.scan.ImageUtils
@@ -72,7 +73,7 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
     }
 
     var resultButtonText by remember {
-        mutableStateOf("Add to library")
+        mutableStateOf("Add to dictionary")
     }
 
     var resultButtonClick by remember {
@@ -124,12 +125,12 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
                 .weight(1f)
                 .padding(10.dp)
         )
-        ResultViewItem(resultText = resultText,
+        ResultViewItem(
+            resultText = resultText,
             translatedText = translatedText,
-            buttonText = "Add to library",
-            onButtonClick = {
-                showSelectDictionaryDialog = true
-            })
+            buttonText = resultButtonText,
+            onButtonClick = resultButtonClick
+        )
     }
 
     if (showSelectDictionaryDialog) {
@@ -144,6 +145,15 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
                 translation = translatedText,
                 image = ImageUtils.getBase64FromPath(imageUri.toString())
             )
+            resultButtonText = "Go to library"
+            resultButtonClick = {
+                navController.navigate(Routes.LibraryScreen.Root) {
+                    popUpTo(Routes.ScanScreen.Root) {
+                        inclusive = true
+                    }
+                }
+            }
+
             Toast.makeText(context, "Word was added to dictionary!", Toast.LENGTH_LONG).show()
         }, onCreateDictionary = {
             showSelectDictionaryDialog = false
