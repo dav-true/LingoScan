@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -35,6 +36,7 @@ import com.lingoscan.compose.navigation.Routes
 import com.lingoscan.utils.scan.ImageUtils
 import com.lingoscan.ui.theme.Pink80
 import com.lingoscan.ui.theme.PinkRed80
+import com.lingoscan.viewmodels.MainViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -43,7 +45,7 @@ import java.nio.charset.StandardCharsets
 fun ScanScreen(
     navController: NavHostController
 ) {
-
+    val mainViewModel = hiltViewModel<MainViewModel>()
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     var uploadedImageUri by remember { mutableStateOf<Uri?>(null) }
 

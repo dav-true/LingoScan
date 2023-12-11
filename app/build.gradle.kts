@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("de.undercouch.download") version "5.5.0"
+    id("io.realm.kotlin") version "1.13.0"
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
@@ -101,8 +102,18 @@ dependencies {
 
     //compose navigation
     implementation("androidx.navigation:navigation-compose:2.7.5")
-
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+
+
+    //realm + mongodb
+    implementation("io.realm.kotlin:library-sync:1.13.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // Message Bar Compose
+    implementation("com.github.stevdza-san:MessageBarCompose:1.0.5")
+
+    // One-Tap Compose
+    implementation ("com.github.stevdza-san:OneTapCompose:1.0.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

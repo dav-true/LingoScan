@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.lingoscan.compose.navigation.FirstLaunchNavigation
+import com.lingoscan.compose.navigation.AuthNavigation
 import com.lingoscan.compose.navigation.LingoBottomNavigation
 import com.lingoscan.compose.navigation.LingoNavigation
 import com.lingoscan.compose.navigation.LingoToolbar
@@ -43,9 +43,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             LingoScanTheme {
-                // A surface container using the 'background' color from the theme
-                FirstLaunchNavigation(
-                    firstLaunchController = firstLaunchController,
+                AuthNavigation(
+                    authNavController = firstLaunchController,
                     navController = navController,
                     firstLaunch = persistentStorage.isFirstLaunch
                 )

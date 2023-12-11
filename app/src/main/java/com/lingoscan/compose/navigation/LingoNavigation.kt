@@ -15,6 +15,9 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.lingoscan.compose.screens.account.AccountScreen
 import com.lingoscan.compose.screens.account.LanguageSettingsScreen
+import com.lingoscan.compose.screens.learning.LearningScreen
+import com.lingoscan.compose.screens.library.DictionaryScreen
+import com.lingoscan.compose.screens.library.LibraryScreen
 import com.lingoscan.compose.screens.scan.CameraScreen
 import com.lingoscan.compose.screens.scan.ScanScreen
 import com.lingoscan.compose.screens.scan.UploadedImageScreen
@@ -62,8 +65,17 @@ fun NavGraphBuilder.libraryScreenGraph(
 ) {
     navigation(route = Routes.LibraryScreen.route, startDestination = Routes.LibraryScreen.Root) {
         composable(Routes.LibraryScreen.Root) {
-            Text(text = "Library Screen")
+            LibraryScreen(navController = navController)
+        }
 
+        composable(route = "${Routes.LibraryScreen.Dictionary}/{dictionaryId}", arguments = listOf(
+            navArgument("dictionaryId") {
+                type = NavType.StringType
+            }
+        )) { entry ->
+            val dictionaryId = entry.arguments?.getString("dictionaryId").orEmpty()
+            Log.d("DictionaryId", dictionaryId)
+            DictionaryScreen(navController = navController, dictionaryId = dictionaryId)
         }
     }
 }
@@ -73,7 +85,7 @@ fun NavGraphBuilder.learningScreenGraph(
 ) {
     navigation(route = Routes.LearningScreen.route, startDestination = Routes.LearningScreen.Root) {
         composable(Routes.LearningScreen.Root) {
-            Text(text = "Learning Screen")
+            LearningScreen(navController = navController)
         }
     }
 }
@@ -107,6 +119,7 @@ sealed class Routes {
     object LibraryScreen : Routes() {
         const val route = "library"
         const val Root = "library/library"
+        const val Dictionary = "library/library/dictionary"
     }
 
     object LearningScreen : Routes() {

@@ -1,12 +1,10 @@
 package com.lingoscan.compose.screens.firstlaunch
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,19 +15,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.lingoscan.compose.components.common.LanguageDownloadingDialog
 import com.lingoscan.compose.components.common.SelectLanguageButton
 import com.lingoscan.compose.components.common.SelectLanguageDialog
-import com.lingoscan.compose.navigation.FirstLaunchNavigationRoutes
-import com.lingoscan.ui.theme.Purple80
-import com.lingoscan.ui.theme.PurpleGrey80
+import com.lingoscan.compose.navigation.AuthNavigationRoutes
 import com.lingoscan.ui.theme.PurpleLight
 import com.lingoscan.utils.translate.LanguageModel
 import com.lingoscan.viewmodels.ComposableViewModel
@@ -85,7 +79,7 @@ fun FirstLaunchScreen(
             showSelectLanguageDialog.value = true
         }
     }
-    
+
     if (showSelectLanguageDialog.value) {
         SelectLanguageDialog(
             languages = allLanguages,
@@ -99,8 +93,8 @@ fun FirstLaunchScreen(
 
                         composableViewModel.translatorHelper.create(onSuccess = {
                             showLanguageDownloadingDialog.value = false
-                            navController.navigate(FirstLaunchNavigationRoutes.MainScreen) {
-                                popUpTo(FirstLaunchNavigationRoutes.FirstLaunch) {
+                            navController.navigate(AuthNavigationRoutes.MainScreen) {
+                                popUpTo(AuthNavigationRoutes.FirstLaunch) {
                                     inclusive = true
                                 }
                             }
