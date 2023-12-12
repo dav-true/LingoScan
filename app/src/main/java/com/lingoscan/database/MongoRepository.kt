@@ -15,15 +15,15 @@ interface MongoRepository {
 
     suspend fun addWord(word: Word, dictionaryId: String)
 
-    suspend fun moveWord(word: Word)
+    suspend fun moveWord(sourceDictionaryId: String, targetDictionaryId: String, wordId: String)
 
-    suspend fun deleteWord(word: Word)
+    suspend fun deleteWord(dictionaryId: String, wordId: String)
 
     suspend fun getWords(dictionaryId: String): Flow<List<Word>>
 
     suspend fun deleteAllWordsFromDictionary()
 
-    suspend fun createDictionaryWithWord(dictionary: Dictionary, word: Word)
-
     suspend fun deleteAllDictionaries()
+
+    suspend fun renameDictionary(dictionaryId: String, name: String)
 }

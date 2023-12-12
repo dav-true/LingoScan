@@ -11,9 +11,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 @Composable
-fun CreateDictionaryDialog(
+fun TextFieldDialog(
+    title: String,
+    textFieldPlaceholder: String,
+    confirmButtonText: String,
     onDismissRequest: () -> Unit,
-    onCreateDictionary: (String) -> Unit
+    onConfirm: (String) -> Unit
 ) {
 
     var textFieldValue by remember {
@@ -23,7 +26,7 @@ fun CreateDictionaryDialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = {
-            Text(text = "Create dictionary")
+            Text(text = title)
         },
         text = {
             TextField(
@@ -32,18 +35,18 @@ fun CreateDictionaryDialog(
                     textFieldValue = it
                 },
                 label = {
-                    Text(text = "Dictionary name")
+                    Text(text = textFieldPlaceholder)
                 }
             )
         },
         confirmButton = {
             Button(
                 onClick = {
-                    onCreateDictionary(textFieldValue)
+                    onConfirm(textFieldValue)
                     onDismissRequest()
                 }
             ) {
-                Text(text = "Create")
+                Text(text = confirmButtonText)
             }
         },
         dismissButton = {

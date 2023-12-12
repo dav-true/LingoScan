@@ -36,7 +36,7 @@ class MongoDB @Inject constructor() : MongoRepository {
     override fun configureTheRealm() {
         if (user != null) {
             val config = SyncConfiguration.Builder(
-                user, setOf(/*User::class, */Dictionary::class, Word::class)
+                user, setOf(Dictionary::class, Word::class)
             ).initialSubscriptions { sub ->
                 add(query = sub.query<Dictionary>(query = "owner_id == $0", user.id))
                 add(query = sub.query<Word>(query = "owner_id == $0", user.id))
@@ -103,18 +103,33 @@ class MongoDB @Inject constructor() : MongoRepository {
         }
     }
 
+    override suspend fun renameDictionary(dictionaryId: String, name: String) {
+        if (user != null) {
+            realm.write {
+                try {
+                    realm.query<Dictionary>().query(
+                        "_id == $0",
+                        ObjectId(dictionaryId)
+                    ).first().find()?.let {
+                        findLatest(it)?.apply {
+                            this.name = name
+                        }?.let { latest ->
+                            copyToRealm(latest)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.d("MongoRepository", e.message.toString())
+                }
+            }
+        }
+    }
+
 
     override suspend fun addDictionary(dictionary: Dictionary) {
         if (user != null) {
-
             realm.write {
                 try {
-                    val createdDictionary = copyToRealm(dictionary.apply { owner_id = user.id })
-
-                    createdDictionary.words.firstOrNull()?.let {
-                        addWordToDictionary(createdDictionary._id, it)
-                    }
-
+                    copyToRealm(dictionary.apply { owner_id = user.id })
                 } catch (e: Exception) {
                     Log.d("MongoRepository", e.message.toString())
                 }
@@ -127,7 +142,7 @@ class MongoDB @Inject constructor() : MongoRepository {
     }
 
     override suspend fun deleteDictionary(id: String) {
-        if(user != null) {
+        if (user != null) {
             realm.write {
                 try {
                     realm.query<Dictionary>().query("_id == $0", ObjectId(id)).first().find()
@@ -149,22 +164,61 @@ class MongoDB @Inject constructor() : MongoRepository {
         }
     }
 
-    override suspend fun moveWord(word: Word) {
+    override suspend fun moveWord(
+        sourceDictionaryId: String,
+        targetDictionaryId: String,
+        wordId: String
+    ) {
+        if (user != null) {
+            realm.writeBlocking {
+                try {
+                    val word =
+                        realm.query<Word>().query("_id == $0", ObjectId(wordId)).first().find()
+                            ?.let { word ->
+                                findLatest(word)
+                            }
+
+                    word?.let {
+                        addWordToDictionary(ObjectId(targetDictionaryId), it)
+
+                        realm.query<Dictionary>().query("_id == $0", ObjectId(sourceDictionaryId))
+                            .first()
+                            .find()
+                            ?.let { dictionary ->
+                                findLatest(dictionary)?.apply {
+                                    words.remove(word)
+                                }?.let { latest ->
+                                    copyToRealm(latest)
+                                }
+                            }
+                    }
+                } catch (e: Exception) {
+                    Log.d("MongoRepository", e.message.toString())
+                }
+            }
+        }
     }
 
-    override suspend fun deleteWord(word: Word) {
-
-    }
-
-    override suspend fun createDictionaryWithWord(dictionary: Dictionary, word: Word) {
+    override suspend fun deleteWord(dictionaryId: String, wordId: String) {
         if (user != null) {
             realm.write {
                 try {
-                    val createdDictionary = copyToRealm(dictionary.apply { owner_id = user.id })
+                    realm.query<Dictionary>().query("_id == $0", ObjectId(dictionaryId)).first()
+                        .find()
+                        ?.let { dictionary ->
+                            dictionary.words.firstOrNull { it._id == ObjectId(wordId) }?.let {
+                                findLatest(it)?.let { latest ->
+                                    delete(latest)
+                                }
+                            }
+                        }
 
-                    createdDictionary.words.add(word.apply { owner_id = user.id })
-
-                    copyToRealm(createdDictionary)
+                    realm.query<Word>().query("_id == $0", ObjectId(wordId)).first().find()
+                        ?.let { word ->
+                            findLatest(word)?.let { latest ->
+                                delete(latest)
+                            }
+                        }
                 } catch (e: Exception) {
                     Log.d("MongoRepository", e.message.toString())
                 }
@@ -173,7 +227,7 @@ class MongoDB @Inject constructor() : MongoRepository {
     }
 
     private fun MutableRealm.addWordToDictionary(dictionaryId: ObjectId, word: Word) {
-        if(user != null) {
+        if (user != null) {
             realm.query<Dictionary>()
                 .query("_id == $0", dictionaryId)
                 .first()

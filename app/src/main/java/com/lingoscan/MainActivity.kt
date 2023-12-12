@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.lingoscan.compose.components.common.CreateDictionaryDialog
+import com.lingoscan.compose.components.common.TextFieldDialog
 import com.lingoscan.compose.navigation.AuthNavigation
 import com.lingoscan.compose.navigation.LingoBottomNavigation
 import com.lingoscan.compose.navigation.LingoNavigation
@@ -88,11 +88,14 @@ fun MainScreen(
     }
 
     if (showCreateDictionaryDialog) {
-        CreateDictionaryDialog(
+        TextFieldDialog(
+            title = "Create dictionary",
+            textFieldPlaceholder = "Dictionary name",
+            confirmButtonText = "Create",
             onDismissRequest = {
                 showCreateDictionaryDialog = false
             },
-            onCreateDictionary = {
+            onConfirm = {
                 mainViewModel.createDictionary(name = it)
                 showCreateDictionaryDialog = false
             }

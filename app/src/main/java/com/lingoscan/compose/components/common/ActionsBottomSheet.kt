@@ -3,6 +3,7 @@ package com.lingoscan.compose.components.common
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +40,27 @@ fun DictionaryBottomSheetActions(
         },
         headlineContent = { Text("Rename") },
         leadingContent = { Icon(Icons.Default.Create, null) }
+    )
+    ListItem(
+        modifier = Modifier.clickable {
+            onRemove()
+        },
+        headlineContent = { Text("Remove") },
+        leadingContent = { Icon(Icons.Default.Delete, null) }
+    )
+}
+
+@Composable
+fun WordsBottomSheetActions(
+    onMove: () -> Unit,
+    onRemove: () -> Unit
+) {
+    ListItem(
+        modifier = Modifier.clickable {
+            onMove()
+        },
+        headlineContent = { Text("Move") },
+        leadingContent = { Icon(Icons.Default.ArrowForward, null) }
     )
     ListItem(
         modifier = Modifier.clickable {

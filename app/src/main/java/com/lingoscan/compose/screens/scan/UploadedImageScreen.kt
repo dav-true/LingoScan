@@ -5,19 +5,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,15 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.lingoscan.compose.components.common.CreateDictionaryDialog
+import com.lingoscan.compose.components.common.TextFieldDialog
 import com.lingoscan.compose.components.common.SelectDictionaryDialog
 import com.lingoscan.compose.components.scan.ResultViewItem
 import com.lingoscan.compose.navigation.Routes
-import com.lingoscan.presentations.DictionaryPresentation
 import com.lingoscan.utils.scan.ImageClassifierHelper
 import com.lingoscan.utils.scan.ImageUtils
 import com.lingoscan.utils.scan.getString
@@ -162,16 +150,17 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
     }
 
     if (showCreateDictionaryDialog) {
-        CreateDictionaryDialog(onDismissRequest = {
-            showCreateDictionaryDialog = false
-        }, onCreateDictionary = { dictionaryName ->
-            mainViewModel.createDictionaryAndAddWord(
-                dictionaryName = dictionaryName,
-                wordName = resultText,
-                translation = translatedText,
-                image = ImageUtils.getBase64FromPath(imageUri.toString())
-            )
-        })
+        TextFieldDialog(
+            title = "Create new dictionary",
+            textFieldPlaceholder = "Dictionary name",
+            confirmButtonText = "Create",
+            onDismissRequest = {
+                showCreateDictionaryDialog = false
+            }, onConfirm = { dictionaryName ->
+                mainViewModel.createDictionary(name = dictionaryName)
+                showCreateDictionaryDialog = false
+                showSelectDictionaryDialog = true
+            })
     }
 }
 
