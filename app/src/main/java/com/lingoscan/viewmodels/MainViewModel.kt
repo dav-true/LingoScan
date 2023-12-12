@@ -4,19 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lingoscan.database.MongoDB
 import com.lingoscan.model.Dictionary
+import com.lingoscan.model.Statistic
 import com.lingoscan.model.Word
 import com.lingoscan.presentations.DictionaryPresentation
+import com.lingoscan.presentations.StatisticPresentation
 import com.lingoscan.presentations.WordPresentation
 import com.lingoscan.presentations.mapper.toPresentation
 import com.lingoscan.utils.preferences.PersistentStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.mongodb.kbson.ObjectId
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,11 +32,16 @@ class MainViewModel @Inject constructor(
     val dictionaries = _dictionaries.asStateFlow()
 
     private val _words: MutableStateFlow<List<WordPresentation>?> = MutableStateFlow(null)
-
     val words = _words.asStateFlow()
 
     private val _selectedWord = MutableStateFlow<WordPresentation?>(null)
     val selectedWord = _selectedWord.asStateFlow()
+
+    private val _statistics: MutableStateFlow<List<StatisticPresentation>?> =
+        MutableStateFlow(null)
+
+    val statistics = _statistics.asStateFlow()
+
 
     fun getDictionaries() {
         viewModelScope.launch {
@@ -141,6 +148,35 @@ class MainViewModel @Inject constructor(
                     this.translation = translationText
                 }
             )
+        }
+    }
+
+
+    fun saveQuizResults(
+        dictionaryId: String,
+        wordCorrect: Int,
+        wordTotal: Int,
+        testType: String,
+    ) {
+        viewModelScope.launch {
+            mongoDB.addStatistic(
+                dictionaryId = dictionaryId,
+                Statistic().apply {
+                    this.wordsCorrect = wordCorrect
+                    this.wordsTotal = wordTotal
+                    this.test_type = testType
+                    this.language = persistentStorage.targetLanguage
+                }
+            )
+            getStatistics()
+        }
+    }
+
+    fun getStatistics() {
+        viewModelScope.launch {
+            mongoDB.getStatistics(persistentStorage.targetLanguage).collectLatest {
+                _statistics.value = it.map { it.toPresentation() }
+            }
         }
     }
 }

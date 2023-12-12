@@ -16,3 +16,13 @@ data class WordPresentation(
     val image: String,
     val translation: String
 )
+
+data class StatisticPresentation(
+    val id: String,
+    val dictionary_name: String,
+    val wordsCorrect: Int,
+    val wordsTotal: Int,
+    val date: String,
+    val test_type: String,
+    val language: String
+)

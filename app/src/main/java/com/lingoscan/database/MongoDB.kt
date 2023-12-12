@@ -3,6 +3,7 @@ package com.lingoscan.database
 import android.util.Log
 import com.lingoscan.Constants
 import com.lingoscan.model.Dictionary
+import com.lingoscan.model.Statistic
 //import com.lingoscan.model.User
 import com.lingoscan.model.Word
 import io.realm.kotlin.MutableRealm
@@ -11,6 +12,7 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
+import io.realm.kotlin.query.Sort
 import io.realm.kotlin.query.find
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -33,10 +35,11 @@ class MongoDB @Inject constructor() : MongoRepository {
     override fun configureTheRealm() {
         if (user != null) {
             val config = SyncConfiguration.Builder(
-                user, setOf(Dictionary::class, Word::class)
+                user, setOf(Dictionary::class, Word::class, Statistic::class)
             ).initialSubscriptions { sub ->
                 add(query = sub.query<Dictionary>(query = "owner_id == $0", user.id))
                 add(query = sub.query<Word>(query = "owner_id == $0", user.id))
+                add(query = sub.query<Statistic>(query = "owner_id == $0", user.id))
             }.log(LogLevel.ALL).build()
             realm = Realm.open(config)
         }
@@ -160,7 +163,27 @@ class MongoDB @Inject constructor() : MongoRepository {
         }
     }
 
-    override suspend fun updateDictionary(dictionary: Dictionary) {
+    override suspend fun addStatistic(dictionaryId: String, statistic: Statistic) {
+        if (user != null) {
+            realm.write {
+                try {
+                    realm.query<Dictionary>().query("_id == $0", ObjectId(dictionaryId))
+                        .first().find()?.let {
+                            copyToRealm(statistic.apply {
+                                dictionary_name = it.name
+                                owner_id = user.id
+                            })
+                        }
+                } catch (e: Exception) {
+                    Log.d("MongoRepository", e.message.toString())
+                }
+            }
+        }
+    }
+
+    override suspend fun getStatistics(currentLanguage: String): Flow<List<Statistic>> {
+        return realm.query<Statistic>().query("language == $0", currentLanguage).sort("timestamp", Sort.DESCENDING).asFlow()
+            .map { it.list }
     }
 
     override suspend fun deleteDictionary(id: String) {

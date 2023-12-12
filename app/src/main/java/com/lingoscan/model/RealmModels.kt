@@ -1,7 +1,7 @@
 package com.lingoscan.model
 
 import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.EmbeddedRealmObject
+import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -34,4 +34,14 @@ class Word : RealmObject {
     var translation: String = ""
 }
 
+class Statistic : RealmObject {
+    @PrimaryKey var _id: ObjectId = ObjectId.invoke()
+    var owner_id: String = ""
+    var dictionary_name: String = ""
+    var wordsCorrect: Int = 0
+    var wordsTotal: Int = 0
+    var test_type: String = ""
+    var language: String = ""
+    var timestamp: RealmInstant = RealmInstant.now()
+}
 

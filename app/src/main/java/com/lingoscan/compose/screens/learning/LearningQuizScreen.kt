@@ -115,6 +115,12 @@ fun LearningQuizScreen(
                             }
 
                             if (isLastPage) {
+                                mainViewModel.saveQuizResults(
+                                    dictionaryId = dictionaryId,
+                                    wordCorrect = learningViewModel.currentScore.value,
+                                    wordTotal = _shuffledWords.size,
+                                    testType = TestType.WORD_SELECTION.name
+                                )
                                 navController.navigate(
                                     "${Routes.LearningScreen.QuizResult}/${learningViewModel.currentScore.value}/${_shuffledWords.size}"
                                 ) {

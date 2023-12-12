@@ -1,6 +1,7 @@
 package com.lingoscan.database
 
 import com.lingoscan.model.Dictionary
+import com.lingoscan.model.Statistic
 import com.lingoscan.model.Word
 //import com.lingoscan.model.User
 import kotlinx.coroutines.flow.Flow
@@ -10,12 +11,13 @@ interface MongoRepository {
     fun configureTheRealm()
     fun getDictionaries(currentLanguage: String): Flow<List<Dictionary>>
     suspend fun addDictionary(dictionary: Dictionary)
-    suspend fun updateDictionary(dictionary: Dictionary)
+    suspend fun addStatistic(dictionaryId: String, statistic: Statistic)
+    suspend fun getStatistics(currentLanguage: String): Flow<List<Statistic>>
     suspend fun deleteDictionary(id: String)
 
     suspend fun addWord(word: Word, dictionaryId: String)
 
-    suspend fun updateWord(word: Word)
+    suspend fun updateWord(updatedWord: Word)
 
     suspend fun moveWord(sourceDictionaryId: String, targetDictionaryId: String, wordId: String)
 
