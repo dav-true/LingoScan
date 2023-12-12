@@ -2,18 +2,21 @@ package com.lingoscan.compose.navigation
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
-
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.lingoscan.R
+import com.lingoscan.utils.CountryFlags
 import com.lingoscan.utils.otherwiseFalse
+import com.lingoscan.viewmodels.ComposableViewModel
 import kotlin.enums.EnumEntries
 
 
@@ -24,6 +27,8 @@ fun LingoBottomNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val composableViewModel = hiltViewModel<ComposableViewModel>()
+
     val isBottomBarVisible = BottomNavigationItems.entries.rootScreens().contains(currentRoute).otherwiseFalse()
 
     AnimatedVisibility(visible = isBottomBarVisible) {
@@ -31,7 +36,13 @@ fun LingoBottomNavigation(
             BottomNavigationItems.entries.forEachIndexed { index, item ->
                 val isSelected = currentRoute == item.rootScreen
                 NavigationBarItem(
-                    icon = { Icon(painterResource(id = item.icon), contentDescription = null) },
+                    icon = {
+                        if (item == BottomNavigationItems.SETTINGS) {
+                            Text(text = CountryFlags.getCountryFlagByCountryCode(composableViewModel.persistentStorage.targetLanguage))
+                        } else {
+                            Icon(painterResource(id = item.icon), contentDescription = null)
+                        }
+                    },
                     label = { Text(text = item.label) },
                     selected = isSelected,
                     onClick = {
