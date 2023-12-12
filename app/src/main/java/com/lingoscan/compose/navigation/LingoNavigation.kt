@@ -10,7 +10,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.lingoscan.compose.navigation.Routes.LearningScreen.LearningResultsScreen
 import com.lingoscan.compose.screens.account.SettingsScreen
 import com.lingoscan.compose.screens.account.DevSettingsScreen
 import com.lingoscan.compose.screens.account.LanguageSettingsScreen

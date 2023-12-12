@@ -116,7 +116,7 @@ fun LearningWordSelectionScreen(
                             if (isLastPage) {
                                 navController.navigate(Routes.LearningScreen.LearningResultsScreen) {
                                     popUpTo(Routes.LearningScreen.Root) {
-                                        inclusive = true
+                                        inclusive = false
                                     }
                                 }
                             } else {
@@ -156,6 +156,10 @@ fun WordSelectionTestItem(
 
     var wasAnswerCorrect by remember {
         mutableStateOf(false)
+    }
+
+    var isSelectionEnabled by remember {
+        mutableStateOf(true)
     }
 
     Column(
@@ -200,6 +204,7 @@ fun WordSelectionTestItem(
 
                 SelectableOption(text = text,
                     isSelected = isSelected,
+                    isEnabled = isSelectionEnabled,
                     correct = isCorrect,
                     wrong = isWrong,
                     onOptionSelected = {
@@ -217,6 +222,7 @@ fun WordSelectionTestItem(
                     wrongAnswer = selectedOption
                     correctAnswer = presentation.translation
                 }
+                isSelectionEnabled = false
                 showNextButton = true
                 selectedOption = null
             }) {
@@ -239,11 +245,13 @@ fun WordSelectionTestItem(
 fun SelectableOption(
     modifier: Modifier = Modifier,
     text: String,
+    isEnabled: Boolean,
     isSelected: Boolean,
     correct: Boolean = false,
     wrong: Boolean = false,
     onOptionSelected: (String) -> Unit
 ) {
+
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -252,6 +260,7 @@ fun SelectableOption(
             .clip(RoundedCornerShape(8.dp))
             .selectable(
                 selected = (isSelected),
+                enabled = isEnabled,
                 onClick = {
                     onOptionSelected.invoke(text)
                 }
