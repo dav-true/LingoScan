@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -85,7 +83,7 @@ import com.lingoscan.viewmodels.MainViewModel
                 onSelectDictionary = {
                     showSelectDictionaryDialog = false
                     if (testType == TestType.WORD_SELECTION) {
-                        navController.navigate("${Routes.LearningScreen.WordSelection}/${it.id}")
+                        navController.navigate("${Routes.LearningScreen.Quiz}/${it.id}")
                     }
                 }
             )

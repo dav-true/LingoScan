@@ -2,15 +2,12 @@ package com.lingoscan.compose.screens.learning
 
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +29,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,7 +60,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LearningWordSelectionScreen(
+fun LearningQuizScreen(
     navController: NavHostController,
     dictionaryId: String
 ) {
@@ -120,7 +116,7 @@ fun LearningWordSelectionScreen(
 
                             if (isLastPage) {
                                 navController.navigate(
-                                    "${Routes.LearningScreen.LearningResultsScreen}/${learningViewModel.currentScore.value}/${_shuffledWords.size}"
+                                    "${Routes.LearningScreen.QuizResult}/${learningViewModel.currentScore.value}/${_shuffledWords.size}"
                                 ) {
                                     popUpTo(Routes.LearningScreen.Root) {
                                         inclusive = false

@@ -13,9 +13,9 @@ import androidx.navigation.navigation
 import com.lingoscan.compose.screens.account.SettingsScreen
 import com.lingoscan.compose.screens.account.DevSettingsScreen
 import com.lingoscan.compose.screens.account.LanguageSettingsScreen
-import com.lingoscan.compose.screens.learning.LearningResultsScreen
+import com.lingoscan.compose.screens.learning.LearningQuizResultsScreen
 import com.lingoscan.compose.screens.learning.LearningScreen
-import com.lingoscan.compose.screens.learning.LearningWordSelectionScreen
+import com.lingoscan.compose.screens.learning.LearningQuizScreen
 import com.lingoscan.compose.screens.library.DictionaryScreen
 import com.lingoscan.compose.screens.library.LibraryScreen
 import com.lingoscan.compose.screens.library.WordScreen
@@ -101,17 +101,17 @@ fun NavGraphBuilder.learningScreenGraph(
         }
 
         composable(
-            route = "${Routes.LearningScreen.WordSelection}/{dictionaryId}", arguments = listOf(
+            route = "${Routes.LearningScreen.Quiz}/{dictionaryId}", arguments = listOf(
                 navArgument("dictionaryId") {
                     type = NavType.StringType
                 })
         ) { entry ->
 
             val dictionaryId = entry.arguments?.getString("dictionaryId").orEmpty()
-            LearningWordSelectionScreen(navController = navController, dictionaryId = dictionaryId)
+            LearningQuizScreen(navController = navController, dictionaryId = dictionaryId)
         }
 
-        composable(route = "${Routes.LearningScreen.LearningResultsScreen}/{userScore}/{totalWordsCount}", arguments = listOf(
+        composable(route = "${Routes.LearningScreen.QuizResult}/{userScore}/{totalWordsCount}", arguments = listOf(
             navArgument("userScore") {
                 type = NavType.IntType
             },
@@ -121,7 +121,7 @@ fun NavGraphBuilder.learningScreenGraph(
         )) { entry ->
             val userScore = entry.arguments?.getInt("userScore") ?: 0
             val totalWordsCount = entry.arguments?.getInt("totalWordsCount") ?: 0
-            LearningResultsScreen(navController, userScore, totalWordsCount)
+            LearningQuizResultsScreen(navController, userScore, totalWordsCount)
         }
     }
 }
@@ -162,8 +162,8 @@ sealed class Routes {
     object LearningScreen : Routes() {
         const val route = "learning"
         const val Root = "learning/screen"
-        const val WordSelection = "learning/screen/word_selection"
-        const val LearningResultsScreen = "learning/screen/learning_results_screen"
+        const val Quiz = "learning/screen/quiz"
+        const val QuizResult = "learning/screen/quiz_result"
     }
 
     object Settings : Routes() {
