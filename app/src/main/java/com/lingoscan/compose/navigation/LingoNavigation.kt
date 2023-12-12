@@ -18,6 +18,7 @@ import com.lingoscan.compose.screens.account.LanguageSettingsScreen
 import com.lingoscan.compose.screens.learning.LearningScreen
 import com.lingoscan.compose.screens.library.DictionaryScreen
 import com.lingoscan.compose.screens.library.LibraryScreen
+import com.lingoscan.compose.screens.library.WordScreen
 import com.lingoscan.compose.screens.scan.CameraScreen
 import com.lingoscan.compose.screens.scan.ScanScreen
 import com.lingoscan.compose.screens.scan.UploadedImageScreen
@@ -76,6 +77,15 @@ fun NavGraphBuilder.libraryScreenGraph(
             Log.d("DictionaryId", dictionaryId)
             DictionaryScreen(navController = navController, dictionaryId = dictionaryId)
         }
+
+        composable(route = "${Routes.LibraryScreen.Word}/{wordId}", arguments = listOf(
+            navArgument("wordId") {
+                type = NavType.StringType
+            }
+        )) { entry ->
+            val wordId = entry.arguments?.getString("wordId").orEmpty()
+            WordScreen(navController = navController, wordId = wordId)
+        }
     }
 }
 
@@ -119,6 +129,7 @@ sealed class Routes {
         const val route = "library"
         const val Root = "library/library"
         const val Dictionary = "library/library/dictionary"
+        const val Word = "library/library/dictionary/word"
     }
 
     object LearningScreen : Routes() {

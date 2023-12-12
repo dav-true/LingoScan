@@ -7,15 +7,12 @@ import com.lingoscan.model.Dictionary
 import com.lingoscan.model.Word
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
-import io.realm.kotlin.UpdatePolicy
-import io.realm.kotlin.ext.copyFromRealm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.query.find
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import org.mongodb.kbson.ObjectId
 import javax.inject.Inject
@@ -52,6 +49,11 @@ class MongoDB @Inject constructor() : MongoRepository {
             }
     }
 
+    override suspend fun getWord(wordId: String): Flow<Word?> {
+        return realm.query<Word>().query("_id == $0", ObjectId(wordId)).first().asFlow()
+            .map { it.obj }
+    }
+
     override fun getDictionaries(currentLanguage: String): Flow<List<Dictionary>> {
         return realm.query<Dictionary>().query("language == $0", currentLanguage).asFlow()
             .map { it.list }
@@ -64,6 +66,26 @@ class MongoDB @Inject constructor() : MongoRepository {
             realm.write {
                 try {
                     addWordToDictionary(ObjectId(dictionaryId), word)
+                } catch (e: Exception) {
+                    Log.d("MongoRepository", e.message.toString())
+                }
+            }
+        }
+    }
+
+    override suspend fun updateWord(updatedWord: Word) {
+        if (user != null) {
+            realm.write {
+                try {
+                    realm.query<Word>().query("_id == $0", updatedWord._id).first().find()
+                        ?.let { word ->
+                            findLatest(word)?.apply {
+                                this.name = updatedWord.name
+                                this.translation = updatedWord.translation
+                            }?.let { latest ->
+                                copyToRealm(latest)
+                            }
+                        }
                 } catch (e: Exception) {
                     Log.d("MongoRepository", e.message.toString())
                 }

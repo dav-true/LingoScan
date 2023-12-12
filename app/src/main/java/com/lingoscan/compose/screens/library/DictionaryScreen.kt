@@ -31,6 +31,7 @@ import com.lingoscan.compose.components.common.SelectDictionaryDialog
 import com.lingoscan.compose.components.common.TextFieldDialog
 import com.lingoscan.compose.components.common.WordsBottomSheetActions
 import com.lingoscan.compose.components.library.WordItem
+import com.lingoscan.compose.navigation.Routes
 import com.lingoscan.presentations.WordPresentation
 import com.lingoscan.viewmodels.MainViewModel
 
@@ -81,7 +82,9 @@ fun DictionaryScreen(
                     items(items = it) { wordPresentation ->
                         WordItem(
                             presentation = wordPresentation,
-                            onClick = { },
+                            onClick = {
+                                navController.navigate("${Routes.LibraryScreen.Word}/${wordPresentation.id}")
+                            },
                             onLongClick = {
                                 selectedWord = wordPresentation
                             })
@@ -147,7 +150,7 @@ fun DictionaryScreen(
             )
         }
 
-        if(showCreateDictionaryDialog){
+        if (showCreateDictionaryDialog) {
             TextFieldDialog(
                 title = "Create new dictionary",
                 textFieldPlaceholder = "Enter dictionary name",

@@ -10,10 +10,13 @@ import com.lingoscan.presentations.WordPresentation
 import com.lingoscan.presentations.mapper.toPresentation
 import com.lingoscan.utils.preferences.PersistentStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.mongodb.kbson.ObjectId
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +33,9 @@ class MainViewModel @Inject constructor(
         MutableStateFlow(null)
 
     val words = _words.asStateFlow()
+
+    private val _selectedWord = MutableStateFlow<WordPresentation?>(null)
+    val selectedWord = _selectedWord.asStateFlow()
 
     fun getDictionaries() {
         viewModelScope.launch {
@@ -116,6 +122,26 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             mongoDB.moveWord(sourceDictionaryId, targetDictionaryId, wordId)
             getWords(sourceDictionaryId)
+        }
+    }
+
+    fun getWordById(wordId: String) {
+        viewModelScope.launch {
+            mongoDB.getWord(wordId).collectLatest {
+                _selectedWord.value = it?.toPresentation()
+            }
+        }
+    }
+
+    fun updateWord(wordText: String, translationText: String, wordId: String) {
+        viewModelScope.launch {
+            mongoDB.updateWord(
+                Word().apply {
+                    this._id = ObjectId(wordId)
+                    this.name = wordText
+                    this.translation = translationText
+                }
+            )
         }
     }
 }
