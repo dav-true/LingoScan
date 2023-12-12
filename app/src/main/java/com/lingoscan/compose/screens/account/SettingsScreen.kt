@@ -3,7 +3,6 @@ package com.lingoscan.compose.screens.account
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
@@ -16,13 +15,15 @@ import androidx.navigation.NavController
 import com.lingoscan.compose.navigation.Routes
 
 @Composable
-fun AccountScreen(
+fun SettingsScreen(
     navController: NavController
 ) {
     Column {
-        ListTextItem(text = "Account settings")
+        ListTextItem(modifier = Modifier.clickable {
+            navController.navigate(Routes.Settings.DevSettings)
+        }, text = "Dev settings")
         ListTextItem(
-            modifier = Modifier.clickable { navController.navigate(Routes.AccountScreen.LanguageSettings)},
+            modifier = Modifier.clickable { navController.navigate(Routes.Settings.LanguageSettings) },
             text = "Language settings"
         )
     }

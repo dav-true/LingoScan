@@ -29,8 +29,7 @@ class MainViewModel @Inject constructor(
         MutableStateFlow(null)
     val dictionaries = _dictionaries.asStateFlow()
 
-    private val _words: MutableStateFlow<List<WordPresentation>?> =
-        MutableStateFlow(null)
+    private val _words: MutableStateFlow<List<WordPresentation>?> = MutableStateFlow(null)
 
     val words = _words.asStateFlow()
 

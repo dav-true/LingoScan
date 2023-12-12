@@ -8,7 +8,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -66,7 +65,7 @@ enum class BottomNavigationItems(
     SCAN(Routes.ScanScreen.route, Routes.ScanScreen.Root, R.drawable.ic_scan, "Scan"),
     LIBRARY(Routes.LibraryScreen.route, Routes.LibraryScreen.Root, R.drawable.ic_library, "Library"),
     LEARNING(Routes.LearningScreen.route, Routes.LearningScreen.Root, R.drawable.ic_learning, "Learning"),
-    SETTINGS(Routes.AccountScreen.route, Routes.AccountScreen.Root, R.drawable.ic_account, "Account")
+    SETTINGS(Routes.Settings.route, Routes.Settings.Root, R.drawable.ic_account, "Settings")
 }
 
 fun EnumEntries<BottomNavigationItems>.rootScreens() : List<String> {

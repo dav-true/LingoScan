@@ -1,11 +1,8 @@
 package com.lingoscan.compose.navigation
 
 import android.util.Log
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.core.net.toUri
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,9 +10,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.lingoscan.compose.screens.account.AccountScreen
+import com.lingoscan.compose.navigation.Routes.LearningScreen.LearningResultsScreen
+import com.lingoscan.compose.screens.account.SettingsScreen
+import com.lingoscan.compose.screens.account.DevSettingsScreen
 import com.lingoscan.compose.screens.account.LanguageSettingsScreen
+import com.lingoscan.compose.screens.learning.LearningResultsScreen
 import com.lingoscan.compose.screens.learning.LearningScreen
+import com.lingoscan.compose.screens.learning.LearningWordSelectionScreen
 import com.lingoscan.compose.screens.library.DictionaryScreen
 import com.lingoscan.compose.screens.library.LibraryScreen
 import com.lingoscan.compose.screens.library.WordScreen
@@ -34,7 +35,7 @@ fun LingoNavigation(
         scanScreenGraph(navController = navController)
         libraryScreenGraph(navController = navController)
         learningScreenGraph(navController = navController)
-        accountScreenGraph(navController = navController)
+        settingsScreenGraph(navController = navController)
     }
 }
 
@@ -54,7 +55,10 @@ fun NavGraphBuilder.scanScreenGraph(
                 type = NavType.StringType
             }
         )) { entry ->
-            val imageUri = URLDecoder.decode(entry.arguments?.getString("imageUri"), StandardCharsets.UTF_8.toString())
+            val imageUri = URLDecoder.decode(
+                entry.arguments?.getString("imageUri"),
+                StandardCharsets.UTF_8.toString()
+            )
             UploadedImageScreen(navController = navController, imageUri = imageUri.toUri())
         }
     }
@@ -96,21 +100,36 @@ fun NavGraphBuilder.learningScreenGraph(
         composable(Routes.LearningScreen.Root) {
             LearningScreen(navController = navController)
         }
+
+        composable(
+            route = "${Routes.LearningScreen.WordSelection}/{dictionaryId}", arguments = listOf(
+                navArgument("dictionaryId") {
+                    type = NavType.StringType
+                })
+        ) { entry ->
+
+            val dictionaryId = entry.arguments?.getString("dictionaryId").orEmpty()
+            LearningWordSelectionScreen(navController = navController, dictionaryId = dictionaryId)
+        }
+
+        composable(route = Routes.LearningScreen.LearningResultsScreen) {
+            LearningResultsScreen(navController)
+        }
     }
 }
 
-fun NavGraphBuilder.accountScreenGraph(
+fun NavGraphBuilder.settingsScreenGraph(
     navController: NavHostController
 ) {
-    navigation(route = Routes.AccountScreen.route, startDestination = Routes.AccountScreen.Root) {
-        composable(Routes.AccountScreen.Root) {
-            AccountScreen(navController = navController)
+    navigation(route = Routes.Settings.route, startDestination = Routes.Settings.Root) {
+        composable(Routes.Settings.Root) {
+            SettingsScreen(navController = navController)
         }
-        composable(Routes.AccountScreen.AccountSettings) {
-            Text(text = "Account Settings")
+        composable(Routes.Settings.DevSettings) {
+            DevSettingsScreen(navController = navController)
         }
 
-        composable(Routes.AccountScreen.LanguageSettings) {
+        composable(Routes.Settings.LanguageSettings) {
             LanguageSettingsScreen(navController = navController)
         }
     }
@@ -135,12 +154,14 @@ sealed class Routes {
     object LearningScreen : Routes() {
         const val route = "learning"
         const val Root = "learning/screen"
+        const val WordSelection = "learning/screen/word_selection"
+        const val LearningResultsScreen = "learning/screen/learning_results_screen"
     }
 
-    object AccountScreen : Routes() {
-        const val route = "account"
-        const val Root = "account/screen"
-        const val AccountSettings = "account/screen/account_settings"
+    object Settings : Routes() {
+        const val route = "settings"
+        const val Root = "settings/screen"
+        const val DevSettings = "account/screen/dev_settings"
         const val LanguageSettings = "account/screen/language_settings"
     }
 }

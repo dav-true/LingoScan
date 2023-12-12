@@ -24,9 +24,10 @@ import com.lingoscan.presentations.DictionaryPresentation
 
 @Composable fun SelectDictionaryDialog(
     dictionaries: List<DictionaryPresentation>,
+    noDictionariesText: String = "You have no dictionaries yet. Create one!",
     onDismissRequest: () -> Unit,
     onSelectDictionary: (DictionaryPresentation) -> Unit,
-    onCreateDictionary: () -> Unit
+    onCreateDictionary: (() -> Unit)? = null
 ) {
 
     Dialog(onDismissRequest = onDismissRequest) {
@@ -55,7 +56,7 @@ import com.lingoscan.presentations.DictionaryPresentation
                     if (dictionaries.isEmpty()) {
                         Text(
                             modifier = Modifier.padding(top = 10.dp, end = 10.dp),
-                            text = "You have no dictionaries yet. Create one!",
+                            text = noDictionariesText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Black
                         )
@@ -71,12 +72,14 @@ import com.lingoscan.presentations.DictionaryPresentation
 
                 }
 
-                Button(
-                    modifier = Modifier
-                        .align(Alignment.End),
-                    onClick = onCreateDictionary
-                ) {
-                    Text(text = "Create new dictionary")
+                if(onCreateDictionary != null) {
+                    Button(
+                        modifier = Modifier
+                            .align(Alignment.End),
+                        onClick = onCreateDictionary
+                    ) {
+                        Text(text = "Create new dictionary")
+                    }
                 }
             }
         }

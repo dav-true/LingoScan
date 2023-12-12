@@ -104,7 +104,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
-
     //realm + mongodb
     implementation("io.realm.kotlin:library-sync:1.13.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

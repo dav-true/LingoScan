@@ -86,6 +86,8 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
         }
 
     LaunchedEffect(Unit) {
+        mainViewModel.getDictionaries()
+
         val bitmap = ImageUtils.getBitmap(context, imageUri)
         bitmap?.let {
             imageClassifierHelper.classify(it)
@@ -122,31 +124,33 @@ import org.tensorflow.lite.task.vision.classifier.Classifications
     }
 
     if (showSelectDictionaryDialog) {
-
-        mainViewModel.getDictionaries()
-        SelectDictionaryDialog(dictionaries = dictionaries.orEmpty(), onDismissRequest = {
-            showSelectDictionaryDialog = false
-        }, onSelectDictionary = {
-            mainViewModel.addWordToDictionary(
-                dictionaryId = it.id,
-                name = resultText,
-                translation = translatedText,
-                image = ImageUtils.getBase64FromPath(imageUri.toString())
-            )
-            resultButtonText = "Go to library"
-            resultButtonClick = {
-                navController.navigate(Routes.LibraryScreen.Root) {
-                    popUpTo(Routes.ScanScreen.Root) {
-                        inclusive = true
+        SelectDictionaryDialog(
+            dictionaries = dictionaries.orEmpty(),
+            onDismissRequest = {
+                showSelectDictionaryDialog = false
+            },
+            onSelectDictionary = {
+                mainViewModel.addWordToDictionary(
+                    dictionaryId = it.id,
+                    name = resultText,
+                    translation = translatedText,
+                    image = ImageUtils.getBase64FromPath(imageUri.toString())
+                )
+                resultButtonText = "Go to library"
+                resultButtonClick = {
+                    navController.navigate(Routes.LibraryScreen.Root) {
+                        popUpTo(Routes.ScanScreen.Root) {
+                            inclusive = true
+                        }
                     }
                 }
-            }
 
-            Toast.makeText(context, "Word was added to dictionary!", Toast.LENGTH_LONG).show()
-        }, onCreateDictionary = {
-            showSelectDictionaryDialog = false
-            showCreateDictionaryDialog = true
-        })
+                Toast.makeText(context, "Word was added to dictionary!", Toast.LENGTH_LONG).show()
+            },
+            onCreateDictionary = {
+                showSelectDictionaryDialog = false
+                showCreateDictionaryDialog = true
+            })
     }
 
     if (showCreateDictionaryDialog) {
