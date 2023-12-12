@@ -1,5 +1,6 @@
 package com.lingoscan.compose.screens.learning
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
@@ -89,6 +90,14 @@ fun LearningWordSelectionScreen(
             _shuffledWords.size
         })
 
+
+        LaunchedEffect(pagerState.currentPage) {
+            learningViewModel.getTranslationOptions(
+                _shuffledWords,
+                _shuffledWords[pagerState.currentPage]
+            )
+        }
+
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             PageCouner(
                 modifier = Modifier.padding(vertical = 10.dp),
@@ -96,17 +105,13 @@ fun LearningWordSelectionScreen(
                 size = _shuffledWords.size
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                HorizontalPager(state = pagerState, userScrollEnabled = false) { page ->
-                    val isLastPage = (page == _shuffledWords.size - 1)
+                HorizontalPager(state = pagerState, userScrollEnabled = false) { _ ->
+                    Log.w("mytag", "page: ${pagerState.currentPage}")
 
-                    LaunchedEffect(Unit) {
-                        learningViewModel.getTranslationOptions(
-                            _shuffledWords,
-                            _shuffledWords[page]
-                        )
-                    }
+                    val isLastPage = (pagerState.currentPage == _shuffledWords.size - 1)
+
                     WordSelectionTestItem(
-                        presentation = _shuffledWords[page],
+                        presentation = _shuffledWords[pagerState.currentPage],
                         options = learningViewModel.options.value,
                         onNextClick = { wasAnswerCorrect ->
                             if (wasAnswerCorrect) {
@@ -114,14 +119,16 @@ fun LearningWordSelectionScreen(
                             }
 
                             if (isLastPage) {
-                                navController.navigate(Routes.LearningScreen.LearningResultsScreen) {
+                                navController.navigate(
+                                    "${Routes.LearningScreen.LearningResultsScreen}/${learningViewModel.currentScore.value}/${_shuffledWords.size}"
+                                ) {
                                     popUpTo(Routes.LearningScreen.Root) {
                                         inclusive = false
                                     }
                                 }
                             } else {
                                 coroutineScope.launch {
-                                    pagerState.animateScrollToPage(page + 1)
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                 }
                             }
                         },

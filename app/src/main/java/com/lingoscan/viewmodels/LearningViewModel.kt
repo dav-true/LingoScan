@@ -12,7 +12,6 @@ class LearningViewModel @Inject constructor() : ViewModel() {
     val options = mutableStateOf<List<String>>(emptyList())
 
     val currentScore = mutableStateOf(0)
-    val totalWordsCount = mutableStateOf(0)
 
     fun getTranslationOptions(
         words: List<WordPresentation>,

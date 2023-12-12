@@ -111,8 +111,17 @@ fun NavGraphBuilder.learningScreenGraph(
             LearningWordSelectionScreen(navController = navController, dictionaryId = dictionaryId)
         }
 
-        composable(route = Routes.LearningScreen.LearningResultsScreen) {
-            LearningResultsScreen(navController)
+        composable(route = "${Routes.LearningScreen.LearningResultsScreen}/{userScore}/{totalWordsCount}", arguments = listOf(
+            navArgument("userScore") {
+                type = NavType.IntType
+            },
+            navArgument("totalWordsCount") {
+                type = NavType.IntType
+            }
+        )) { entry ->
+            val userScore = entry.arguments?.getInt("userScore") ?: 0
+            val totalWordsCount = entry.arguments?.getInt("totalWordsCount") ?: 0
+            LearningResultsScreen(navController, userScore, totalWordsCount)
         }
     }
 }

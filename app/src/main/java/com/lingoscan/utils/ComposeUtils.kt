@@ -13,15 +13,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun <T> T.useDebounce(
     delayMillis: Long = 300L,
-    // 1. couroutine scope
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     delayCondition: Boolean,
     onChange: (T) -> Unit
 ): T{
-    // 2. updating state
     val state by rememberUpdatedState(this)
 
-    // 3. launching the side-effect handler
     DisposableEffect(state){
         val job = coroutineScope.launch {
             if(delayCondition) {
