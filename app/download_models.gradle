@@ -4,5 +4,17 @@ task downloadModelFile(type: Download) {
     overwrite false
 }
 
+task downloadMobileNetV3(type: Download) {
+    src 'https://tfhub.dev/google/lite-model/imagenet/mobilenet_v3_small_100_224/classification/5/metadata/1?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/mobilenetv3.tflite'
+    overwrite false
+}
 
-preBuild.dependsOn downloadModelFile
+task downloadMobileNetV2(type: Download) {
+    src 'https://tfhub.dev/tensorflow/lite-model/mobilenet_v2_1.0_224_quantized/1/metadata/1?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/mobilenetv2.tflite'
+    overwrite false
+}
+
+
+preBuild.dependsOn downloadModelFile, downloadMobileNetV3,downloadMobileNetV2
