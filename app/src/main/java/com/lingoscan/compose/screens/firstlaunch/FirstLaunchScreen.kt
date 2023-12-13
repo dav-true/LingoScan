@@ -92,6 +92,8 @@ fun FirstLaunchScreen(
                         composableViewModel.persistentStorage.setTargetLanguage(languageModel.tag)
 
                         composableViewModel.translatorHelper.create(onSuccess = {
+                            composableViewModel.persistentStorage.setFirstLaunch(false)
+
                             showLanguageDownloadingDialog.value = false
                             navController.navigate(AuthNavigationRoutes.MainScreen) {
                                 popUpTo(AuthNavigationRoutes.FirstLaunch) {

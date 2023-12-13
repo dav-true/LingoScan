@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.lingoscan.compose.components.common.LanguageDownloadingDialog
 import com.lingoscan.compose.components.common.TextFieldDialog
 import com.lingoscan.compose.navigation.AuthNavigation
 import com.lingoscan.compose.navigation.LingoBottomNavigation
@@ -25,6 +27,7 @@ import com.lingoscan.ui.theme.LingoScanTheme
 import com.lingoscan.utils.preferences.PersistentStorage
 import com.lingoscan.utils.scan.ImageClassifierHelper
 import com.lingoscan.utils.translate.TranslatorHelper
+import com.lingoscan.viewmodels.ComposableViewModel
 import com.lingoscan.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -68,8 +71,18 @@ fun MainScreen(
         mutableStateOf(false)
     }
 
-    val mainViewModel = hiltViewModel<MainViewModel>()
+    var showLanguageLoadingDialog by remember {
+        mutableStateOf(true)
+    }
 
+    val mainViewModel = hiltViewModel<MainViewModel>()
+    val composableViewModel = hiltViewModel<ComposableViewModel>()
+
+    LaunchedEffect(Unit) {
+        composableViewModel.translatorHelper.create(onSuccess = {
+            showLanguageLoadingDialog = false
+        })
+    }
     Scaffold(
         topBar = {
             LingoToolbar(
@@ -100,5 +113,9 @@ fun MainScreen(
                 showCreateDictionaryDialog = false
             }
         )
+    }
+
+    if(showLanguageLoadingDialog) {
+        LanguageDownloadingDialog()
     }
 }

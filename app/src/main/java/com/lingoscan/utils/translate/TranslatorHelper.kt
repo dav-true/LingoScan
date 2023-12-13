@@ -22,13 +22,13 @@ class TranslatorHelper @Inject constructor(
     private val modelManager: RemoteModelManager = RemoteModelManager.getInstance()
 
 
-    init {
-        create(onStart = {}, onSuccess = {}, onFailure = {})
-    }
+//    init {
+//        create(onStart = {}, onSuccess = {}, onFailure = {})
+//    }
 
-    fun get(): Translator {
-        return translator
-    }
+//    fun get(): Translator {
+//        return translator
+//    }
 
     fun create(
         onStart: (() -> Unit)? = null,

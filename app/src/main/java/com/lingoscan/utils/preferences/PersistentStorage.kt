@@ -24,7 +24,7 @@ class PersistentStorage @Inject constructor(
     }
 
     val targetLanguage: String
-        get() = sharePreferences.getString(PREF_TARGET_LANGUAGE, TranslateLanguage.UKRAINIAN)
+        get() = sharePreferences.getString(PREF_TARGET_LANGUAGE,  TranslateLanguage.UKRAINIAN)
             ?: TranslateLanguage.UKRAINIAN
 
     val isFirstLaunch: Boolean
