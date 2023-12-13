@@ -26,18 +26,13 @@ class ImageClassifierHelper @Inject constructor(
 
     var imageClassifierListener: ClassifierListener? = null
 
-    var threshold: Float = 0.3f
-    var numThreads: Int = 3
+    var threshold: Float = 0.5f
+    var numThreads: Int = 4
     var maxResults: Int = 1
-    var currentDelegate: Int = 0
-    var currentModel: Int = 0
+    var currentModel: Int = MODEL_MOBILENETV3
 
     init {
         setupImageClassifier()
-    }
-
-    fun clearImageClassifier() {
-        imageClassifier = null
     }
 
     private fun setupImageClassifier() {
@@ -47,20 +42,8 @@ class ImageClassifierHelper @Inject constructor(
 
         val baseOptionsBuilder = BaseOptions.builder().setNumThreads(numThreads)
 
-        when (currentDelegate) {
-            DELEGATE_CPU -> {
-                // Default
-            }
-            DELEGATE_GPU -> {
-                if (CompatibilityList().isDelegateSupportedOnThisDevice) {
-                    baseOptionsBuilder.useGpu()
-                } else {
-                    imageClassifierListener?.onError("GPU is not supported on this device")
-                }
-            }
-            DELEGATE_NNAPI -> {
-                baseOptionsBuilder.useNnapi()
-            }
+        if (CompatibilityList().isDelegateSupportedOnThisDevice) {
+            baseOptionsBuilder.useGpu()
         }
 
         optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
@@ -68,10 +51,9 @@ class ImageClassifierHelper @Inject constructor(
         val modelName =
             when (currentModel) {
                 MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
-                MODEL_EFFICIENTNETV0 -> "efficientnet-lite0.tflite"
-                MODEL_EFFICIENTNETV1 -> "efficientnet-lite1.tflite"
-                MODEL_EFFICIENTNETV2 -> "efficientnet-lite2.tflite"
-                else -> "mobilenetv1.tflite"
+                MODEL_MOBILENETV2 -> "mobilenetv2.tflite"
+                MODEL_MOBILENETV3 -> "mobilenetv3.tflite"
+                else -> "mobilenetv3.tflite"
             }
 
         try {
@@ -81,7 +63,6 @@ class ImageClassifierHelper @Inject constructor(
             imageClassifierListener?.onError(
                 "Image classifier failed to initialize. See error logs for details"
             )
-            Log.e(TAG, "TFLite failed to load model with error: " + e.message)
         }
     }
 
@@ -100,10 +81,6 @@ class ImageClassifierHelper @Inject constructor(
         // process
         var inferenceTime = SystemClock.uptimeMillis()
 
-        // Create preprocessor for the image.
-        // See https://www.tensorflow.org/lite/inference_with_metadata/
-        //            lite_support#imageprocessor_architecture
-
         val width: Int = bitmapBuffer.width
         val height: Int = bitmapBuffer.height
 
@@ -111,10 +88,10 @@ class ImageClassifierHelper @Inject constructor(
 
         val imageProcessor =
             ImageProcessor.Builder()
-                .add( ResizeWithCropOrPadOp(size, size))
+                .add(ResizeWithCropOrPadOp(size, size))
                 .add(
                     ResizeOp(224, 224, ResizeOp.ResizeMethod.BILINEAR)
-                 )
+                )
                 .build()
 
         // Preprocess the image and convert it into a TensorImage for classification.
@@ -132,7 +109,7 @@ class ImageClassifierHelper @Inject constructor(
         )
     }
 
-    private fun getOrientationFromRotation(rotation: Int) : ImageProcessingOptions.Orientation {
+    private fun getOrientationFromRotation(rotation: Int): ImageProcessingOptions.Orientation {
         return when (rotation) {
             Surface.ROTATION_270 ->
                 ImageProcessingOptions.Orientation.BOTTOM_RIGHT
@@ -157,13 +134,9 @@ class ImageClassifierHelper @Inject constructor(
     }
 
     companion object {
-        const val DELEGATE_CPU = 0
-        const val DELEGATE_GPU = 1
-        const val DELEGATE_NNAPI = 2
-        const val MODEL_MOBILENETV1 = 0
-        const val MODEL_EFFICIENTNETV0 = 1
-        const val MODEL_EFFICIENTNETV1 = 2
-        const val MODEL_EFFICIENTNETV2 = 3
+        const val MODEL_MOBILENETV1 = 1
+        const val MODEL_MOBILENETV2 = 2
+        const val MODEL_MOBILENETV3 = 3
 
         private const val TAG = "ImageClassifierHelper"
     }

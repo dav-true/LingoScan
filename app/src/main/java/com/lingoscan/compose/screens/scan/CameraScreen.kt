@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.lingoscan.compose.screens.scan
 
 import android.graphics.Bitmap
@@ -5,14 +7,13 @@ import android.net.Uri
 import android.util.Log
 import android.view.Surface.ROTATION_0
 import android.view.Surface.ROTATION_90
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -76,7 +77,7 @@ import java.util.concurrent.Executors
     val executor = remember { Executors.newSingleThreadExecutor() }
 
     val lensFacing = CameraSelector.LENS_FACING_BACK
-    val preview = Preview.Builder().build()
+    val preview = Preview.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3).build()
     val previewView = remember { PreviewView(context) }
     val imageCapture: ImageCapture = remember { ImageCapture.Builder().build() }
     val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
@@ -127,11 +128,11 @@ import java.util.concurrent.Executors
         cameraProvider.unbindAll()
 
         val imageAnalyzer = ImageAnalysis.Builder().setTargetRotation(ROTATION_0)
+            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
             .setOutputImageRotationEnabled(true)
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888).build().also {
                 it.setAnalyzer(executor) { imageProxy ->
-
                     if (!initializeBitmapBuffer.value) {
                         bitmapBuffer = Bitmap.createBitmap(
                             imageProxy.width, imageProxy.height, Bitmap.Config.ARGB_8888
@@ -163,6 +164,7 @@ import java.util.concurrent.Executors
             }
 
             override fun onResults(results: List<Classifications>?, inferenceTime: Long) {
+                Log.w("mytag", "onResults: ${results}, inferenceTime: ${inferenceTime}")
                 results.getString().let {
                     detectedResult = it
                 }
