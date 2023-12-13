@@ -112,7 +112,7 @@ dependencies {
     implementation("com.github.stevdza-san:MessageBarCompose:1.0.5")
 
     // One-Tap Compose
-    implementation ("com.github.stevdza-san:OneTapCompose:1.0.0")
+    implementation ("com.github.stevdza-san:OneTapCompose:1.0.9")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

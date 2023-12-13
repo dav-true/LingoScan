@@ -67,7 +67,8 @@ fun AuthScreen(
         },
         onDialogDismissed = { message ->
             onDialogDismissed(message)
-        }
+        },
+        rememberAccount = false
     )
 
     LaunchedEffect(key1 = authenticated) {
