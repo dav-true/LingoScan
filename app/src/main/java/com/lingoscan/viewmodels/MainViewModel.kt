@@ -2,6 +2,7 @@ package com.lingoscan.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lingoscan.Constants
 import com.lingoscan.database.MongoDB
 import com.lingoscan.model.Dictionary
 import com.lingoscan.model.Statistic
@@ -12,6 +13,7 @@ import com.lingoscan.presentations.WordPresentation
 import com.lingoscan.presentations.mapper.toPresentation
 import com.lingoscan.utils.preferences.PersistentStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.realm.kotlin.mongodb.App
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -177,6 +179,12 @@ class MainViewModel @Inject constructor(
             mongoDB.getStatistics(persistentStorage.targetLanguage).collectLatest {
                 _statistics.value = it.map { it.toPresentation() }
             }
+        }
+    }
+
+    fun logoutUser() {
+        viewModelScope.launch {
+            App.Companion.create(Constants.ATLAS_APP_ID).currentUser?.logOut()
         }
     }
 }

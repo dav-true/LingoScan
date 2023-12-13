@@ -65,7 +65,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    authNavController: NavHostController
 ) {
     var showCreateDictionaryDialog by remember {
         mutableStateOf(false)
@@ -96,7 +97,7 @@ fun MainScreen(
         }
     ) {
         Surface(modifier = Modifier.padding(it)) {
-            LingoNavigation(navController = navController)
+            LingoNavigation(navController = navController, authNavController = authNavController)
         }
     }
 

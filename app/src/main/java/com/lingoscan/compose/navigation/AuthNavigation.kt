@@ -33,7 +33,7 @@ fun AuthNavigation(
         }
 
         composable(route = AuthNavigationRoutes.MainScreen) {
-            MainScreen(navController = navController)
+            MainScreen(navController = navController, authNavController = authNavController)
         }
     }
 

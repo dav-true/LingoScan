@@ -3,6 +3,7 @@ package com.lingoscan.compose.navigation
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.core.net.toUri
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -28,13 +29,14 @@ import java.nio.charset.StandardCharsets
 
 @Composable
 fun LingoNavigation(
-    navController: NavHostController
+    navController: NavHostController,
+    authNavController: NavHostController
 ) {
     NavHost(navController = navController, startDestination = Routes.ScanScreen.route) {
         scanScreenGraph(navController = navController)
         libraryScreenGraph(navController = navController)
         learningScreenGraph(navController = navController)
-        settingsScreenGraph(navController = navController)
+        settingsScreenGraph(navController = navController, authNavController = authNavController )
     }
 }
 
@@ -127,11 +129,12 @@ fun NavGraphBuilder.learningScreenGraph(
 }
 
 fun NavGraphBuilder.settingsScreenGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    authNavController: NavHostController
 ) {
     navigation(route = Routes.Settings.route, startDestination = Routes.Settings.Root) {
         composable(Routes.Settings.Root) {
-            SettingsScreen(navController = navController)
+            SettingsScreen(navController = navController, authNavController = authNavController)
         }
         composable(Routes.Settings.DevSettings) {
             DevSettingsScreen(navController = navController)
